@@ -23,7 +23,7 @@ pub async fn yt_audio(bot: &Bot, chat_id: i64, url: String) -> Result<(), String
         
     let nf = read_m4a(pathbuf).await;
     let namefile = NamedFile {
-        file_name: nf.0,
+        file_name: nf.0.clone(),
         file_data: nf.1,
     };
     // 如果发送失败则下载低质量音频发送
@@ -49,6 +49,8 @@ pub async fn yt_audio(bot: &Bot, chat_id: i64, url: String) -> Result<(), String
         } else {
             let _ = std::fs::remove_file(nf_low.0);
         }
+    }else {
+        let _ = std::fs::remove_file(nf.0);
     }
     // 低品质音频发送失败时，高品质音频保存在当前目录,以供上传到TG群组中，使用tdl项目
 
