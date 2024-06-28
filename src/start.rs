@@ -1,7 +1,7 @@
+use ferrisgram::error::Result;
 use ferrisgram::{error::GroupIteration, ext::Context, input_file::NamedFile, Bot};
 use tgbot_app::util::verify_telegram;
 use tokio::{fs::File, io::AsyncReadExt};
-use ferrisgram::error::Result;
 
 // This is our callable function for the command handler that we declared earlier
 // It will be triggered when someone send /start to the bot.

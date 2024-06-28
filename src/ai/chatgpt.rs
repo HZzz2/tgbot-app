@@ -20,7 +20,6 @@ pub struct Messages {
     pub content: String,
 }
 
-
 pub async fn chatgpt(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     // Same logic as chat applies on unwrapping effective message here.
     let msg = ctx.effective_message.unwrap();

@@ -5,7 +5,6 @@ use tokio::process::Command;
 use ferrisgram::error::Result;
 
 pub async fn ls(bot: Bot, ctx: Context) -> Result<GroupIteration> {
-
     // Same logic as chat applies on unwrapping effective message here.
     let msg = ctx.effective_message.unwrap();
     let chat_id = msg.chat.id;

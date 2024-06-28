@@ -15,12 +15,12 @@ use handler::handler;
 use start::start;
 
 mod shell;
-use shell::{ls, ping, c, shell};
+use shell::{c, ls, ping, shell};
 mod ai;
 use ai::chatgpt;
 
 pub mod download;
-pub use download::yt_audio;
+pub use download::{yt_audio, ytdlp};
 
 #[tokio::main]
 async fn main() {
@@ -44,14 +44,13 @@ async fn main() {
     dispatcher.add_handler(CommandHandler::new("ls", ls));
     dispatcher.add_handler(CommandHandler::new("ping", ping));
     dispatcher.add_handler(CommandHandler::new("c", c));
-    dispatcher.add_handler(CommandHandler::new("shell",shell));
-
+    dispatcher.add_handler(CommandHandler::new("shell", shell));
 
     // ai
-    dispatcher.add_handler(CommandHandler::new("chatgpt",chatgpt));
+    dispatcher.add_handler(CommandHandler::new("chatgpt", chatgpt));
 
-
-
+    // download
+    dispatcher.add_handler(CommandHandler::new("ytdlp", ytdlp));
 
     // add_handler_to_group is used to map the provided handler to a group manually.
     // note that handler groups are processed in ascending order.

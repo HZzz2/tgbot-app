@@ -1,4 +1,7 @@
-use std::{collections::{BTreeMap, HashMap}, sync::Arc};
+use std::{
+    collections::{BTreeMap, HashMap},
+    sync::Arc,
+};
 
 use once_cell::sync::Lazy;
 use serde::Deserialize;
@@ -11,36 +14,47 @@ pub static GLOBAL_CONFIG: Lazy<Arc<Config>> = Lazy::new(|| {
     Arc::new(config)
 });
 
-
 // 反序列化配置信息
 #[derive(Deserialize, Debug)]
 pub struct Config {
-   pub telegram: Telegram, // TG相关配置信息
-   pub openai: Chatgpt,    // AI相关配置信息
-   pub command: Command,   // 常用命令定制配置信息
-   pub brute_force: BruteForce,
+    pub telegram: Telegram, // TG相关配置信息
+    pub openai: Chatgpt,    // AI相关配置信息
+    pub command: Command,   // 常用命令定制配置信息
+    pub brute_force: BruteForce,
+    pub yt_dlp: YtDlp,
+    pub y_ytdl: YYtdl,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Telegram {
-   pub bot_token: String,
-   pub bot_name: String,
-   pub ids: Vec<String>,
+    pub bot_token: String,
+    pub bot_name: String,
+    pub ids: Vec<String>,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Chatgpt {
-   pub base_url: String,
-   pub model: String,
-   pub api_key: String,
+    pub base_url: String,
+    pub model: String,
+    pub api_key: String,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Command {
-   pub cmd: BTreeMap<String, String>,
+    pub cmd: BTreeMap<String, String>,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct BruteForce {
-   pub ssh: HashMap<String, String>,
+    pub ssh: HashMap<String, String>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct YtDlp {
+    pub proxy: String,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct YYtdl {
+    pub proxy: String,
 }
