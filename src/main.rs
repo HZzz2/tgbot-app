@@ -28,17 +28,18 @@ async fn main() {
     let config = GLOBAL_CONFIG.clone();
 
     let bot_token = &config.telegram.bot_token;
-    // This function creates a new bot instance and the error is handled accordingly
+    // 此函数创建一个新的机器人实例并相应地处理错误
     let bot = match Bot::new(bot_token, None).await {
         Ok(bot) => bot,
         Err(error) => panic!("无法创建bot: {}", error),
     };
 
-    // dispatcher is a part of internal functionality of updater
-    // you may use it for adding handlers.
+    // 调度程序是更新程序内部功能的一部分
+    // 您可以使用它来添加处理程序。
     let dispatcher = &mut Dispatcher::new(&bot);
 
     // add_handler method maps the provided handler in group 0 automatically
+    // add_handler 方法自动将提供的处理程序映射到组 0 中
     dispatcher.add_handler(CommandHandler::new("start", start));
     // shell
     dispatcher.add_handler(CommandHandler::new("ls", ls));

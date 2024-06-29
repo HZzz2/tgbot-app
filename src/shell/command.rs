@@ -25,18 +25,7 @@ pub async fn c(bot: Bot, ctx: Context) -> Result<GroupIteration> {
             return Ok(GroupIteration::EndGroups);
         }
     };
-    // let task= tokio::task::spawn(async move {
-    //     let Ok(output) = Command::new("sh").arg("-c").arg(li).output().await else {
-    //         send_err_msg(bot, chat_id, "执行常用命令执行失败".to_string()).await;
-    //         return Ok(GroupIteration::EndGroups);
-    //     };
-    //     if !&output.status.success() {
-    //         send_err_msg(bot, chat_id, "执行常用命令执行失败".to_string()).await;
-    //         return Ok(GroupIteration::EndGroups);
-    //     }
-    //     let output = output.stdout;
-    //     Ok(output)
-    // });
+
     let Ok(output) = Command::new("sh").arg("-c").arg(li).output().await else {
         send_err_msg(bot, chat_id, "执行常用命令执行失败".to_string()).await;
         return Ok(GroupIteration::EndGroups);

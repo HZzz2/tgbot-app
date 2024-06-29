@@ -1,5 +1,7 @@
 use std::path::PathBuf;
 
+use anyhow::anyhow;
+use anyhow::Result;
 use ferrisgram::input_file::NamedFile;
 use ferrisgram::Bot;
 use rusty_ytdl::RequestOptions;
@@ -58,7 +60,7 @@ pub async fn yt_audio(bot: &Bot, chat_id: i64, url: String) -> Result<(), String
     Ok(())
 }
 
-async fn down_m4a(url: &String, video_quality: VideoQuality) -> Result<PathBuf, anyhow::Error> {
+async fn down_m4a(url: &String, video_quality: VideoQuality) -> Result<PathBuf> {
     // 构建下载音频参数
     let video_options = if GLOBAL_CONFIG.y_ytdl.proxy.is_empty() {
         VideoOptions {
@@ -67,13 +69,22 @@ async fn down_m4a(url: &String, video_quality: VideoQuality) -> Result<PathBuf, 
             ..Default::default()
         }
     } else {
+        let proxy = GLOBAL_CONFIG.y_ytdl.proxy.clone();
+        if proxy.starts_with("socks5") && proxy.as_str().contains('@') {
+            let err_msg = r#"
+            reqwest库不支持带身份验证的socks5，请换成http/https (如果支持了请提交issuse告知我)
+            如需使用socks5，需要不带身份验证的，比如:`socks5://1.2.3.4:1080`
+            "#;
+            return Err(anyhow!(err_msg));
+            // return Err(err_msg);
+        }
         VideoOptions {
             quality: video_quality.clone(),
             filter: VideoSearchOptions::Audio,
             request_options: RequestOptions {
                 client: Some(
                     reqwest::Client::builder()
-                        .proxy(reqwest::Proxy::https(GLOBAL_CONFIG.y_ytdl.proxy.clone()).unwrap())
+                        .proxy(reqwest::Proxy::https(proxy).unwrap())
                         .build()
                         .unwrap(),
                 ),

@@ -1,6 +1,6 @@
 [package]
 name = "tgbot-app"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["HZzz2", "Leslie"]
 # default-run = "tgbot-app"
@@ -17,4 +17,5 @@ toml = "0.8.12"
 rusty_ytdl = "0.7.1"
 async-ssh2-tokio = "0.8.9"
 async-channel = "2.3.1"
-anyhow = "1.0.86"
+# anyhow = "1.0.86"
+anyhow = { version = "1.0", default-features = false }

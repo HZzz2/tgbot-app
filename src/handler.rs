@@ -18,16 +18,20 @@ pub async fn handler(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     let content = msg.text.unwrap();
     let content = content.trim();
 
-    // 如果是油管链接则下载m4a音频格式并发送
+    // 如果是油管链接则下载m4a音频格式并发送   网页版或手机版链接
     if content.starts_with(r"https://www.youtube.com") || content.starts_with(r"https://youtu.be") {
         match yt_audio(&bot, chat_id, content.to_string()).await {
             Ok(_) => return Ok(GroupIteration::EndGroups),
             Err(e) => {
-                send_err_msg(bot, chat_id, format!("Error: {:#?}", e)).await;
+                send_err_msg(bot, chat_id, format!("**Error**: {:#?}", e)).await;
                 return Ok(GroupIteration::EndGroups);
             }
         }
     }
+
+    //todo!
+
+    //todo! 默认为AI问答
 
     // Every api method creates a builder which contains various parameters of that respective method.
     // bot.copy_message(chat.id, chat.id, msg.message_id)

@@ -23,7 +23,6 @@ pub async fn ytdlp(bot: Bot, ctx: Context) -> Result<GroupIteration> {
             GLOBAL_CONFIG.yt_dlp.proxy, link
         )
     };
-    // let com = format!(r#"./yt-dlp {}"#, link);
     let task = tokio::task::spawn_blocking(move || {
         std::process::Command::new("sh")
             .arg("-c")
@@ -33,16 +32,34 @@ pub async fn ytdlp(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     });
     let output = task.await;
 
-    let status = output.unwrap().status;
+    let status = output.as_ref().unwrap().status;
     let result = if status.success() {
         String::from("视频下载成功")
     } else {
         let file_name = "yt-dlp";
         let path = Path::new(file_name);
         if !path.exists() {
-            String::from("当前工作目录没有yt-dlp程序")
+            let err_msg = r#"
+            当前工作目录没有yt-dlp程序: 
+              ```shell
+              wget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp
+              mv ./yt-dlp /root/tgbot_app
+              cd !$
+              chomod +x yt-dlp
+              ```
+              "#;
+            String::from(err_msg)
         } else {
-            String::from("视频下载失败")
+            let out = output.as_ref().unwrap().stdout.clone();
+            let err = output.unwrap().stderr;
+            format!(
+                "
+            *视频下载失败*:
+            stdout: {:#?}
+            stderr: {:#?}
+            ",
+                out, err
+            )
         }
     };
 
