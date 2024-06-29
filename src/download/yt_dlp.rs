@@ -23,6 +23,7 @@ pub async fn ytdlp(bot: Bot, ctx: Context) -> Result<GroupIteration> {
             GLOBAL_CONFIG.yt_dlp.proxy, link
         )
     };
+
     let task = tokio::task::spawn_blocking(move || {
         std::process::Command::new("sh")
             .arg("-c")
@@ -30,6 +31,11 @@ pub async fn ytdlp(bot: Bot, ctx: Context) -> Result<GroupIteration> {
             .output()
             .unwrap()
     });
+
+    let msg = bot.send_message(chat_id, "正在使用yt-dlp下载视频中···".to_string())
+        .send()
+        .await
+        .unwrap();
     let output = task.await;
 
     let status = output.as_ref().unwrap().status;
@@ -63,7 +69,7 @@ pub async fn ytdlp(bot: Bot, ctx: Context) -> Result<GroupIteration> {
         }
     };
 
-    bot.send_message(chat_id, result).send().await?;
 
+    bot.edit_message_text(result).chat_id(chat_id).message_id(msg.message_id).send().await?;
     Ok(GroupIteration::EndGroups)
 }

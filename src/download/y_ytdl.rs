@@ -15,6 +15,7 @@ use tokio::fs::File;
 use tokio::io::AsyncReadExt;
 
 pub async fn yt_audio(bot: &Bot, chat_id: i64, url: String) -> Result<(), String> {
+    let msg = bot.send_message(chat_id, "正在下载音频···".to_string()).send().await.unwrap();
     // 下载高质量音频格式文件
     let pathbuf = match down_m4a(&url, VideoQuality::Highest).await {
         Ok(pf) => pf,
@@ -56,7 +57,7 @@ pub async fn yt_audio(bot: &Bot, chat_id: i64, url: String) -> Result<(), String
         let _ = std::fs::remove_file(nf.0);
     }
     // 低品质音频发送失败时，高品质音频保存在当前目录,以供上传到TG群组中，使用tdl项目
-
+    bot.delete_message(chat_id, msg.message_id).send().await.unwrap();
     Ok(())
 }
 

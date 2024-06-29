@@ -23,12 +23,12 @@ pub struct Config {
     pub brute_force: BruteForce,
     pub yt_dlp: YtDlp,
     pub y_ytdl: YYtdl,
+    pub resend: ReSend,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Telegram {
     pub bot_token: String,
-    pub bot_name: String,
     pub ids: Vec<String>,
 }
 
@@ -57,4 +57,10 @@ pub struct YtDlp {
 #[derive(Deserialize, Debug)]
 pub struct YYtdl {
     pub proxy: String,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct ReSend {
+    pub api_key: String,
+    pub from: String
 }

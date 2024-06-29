@@ -4,8 +4,7 @@
 
 [telegram]
 bot_token = "6763******fpaRuQ" #telegram bot token
-bot_name = "N***Bot"           # telegram bot name
-ids = ["6***9", "6***2"]       # telegram user id
+ids = ["6***9", "6***2"]       # telegram user id   可使用此bot的id，可多个
 
 [openai]
 base_url = "https://api.openai.com/v1/chat/completions" # 请求地址 可更改
@@ -18,7 +17,7 @@ cmd = { "1" = "curl ipinfo.io", "2" = "df -h", "3" = "curl ip.fm", "4" = "curl w
 [brute_force]
 ssh = { "username" = "root", "port" = "22", "brute_file" = "./ssh_password.txt", "threads" = "16", "display_message_time_interval_seconds" = "5" }
 
-
+#使用此命令需下载yt-dlp程序到工作目录并添加执行权限chmod +x yt-dlp
 [yt_dlp] # 使用yt-dlp时是否使用代理
 proxy = "" # 为空则不使用代理，默认不使用代理 (由于某些IP会被油管禁止，如果无法下载可以使用代理)
 #proxy = "socks5://username:password@1.2.3.4:1080"  # 支持HTTP/HTTPS/SOCKS proxy 可选身份验证
@@ -26,6 +25,20 @@ proxy = "" # 为空则不使用代理，默认不使用代理 (由于某些IP会
 [y_ytdl] # 目前reqwest好像不支持带身份验证socks5。HTTP/HTTPS可选择带身份验证，推荐
 proxy = "" # 为空则不使用代理，默认不使用代理 (由于某些IP会被油管禁止，如果无法下载可以使用代理)
 #proxy = "http://username:password@1.2.3.4:1880"  # HTTP/HTTPS可选身份验证，暂不支持带有账号密码验证的socks5。 reqwest crate本人测试后发现无法使用带身份验证的socks5代理 如果要使用，socks5要没有身份验证的才行，不推荐
+
+
+
+# 如需使用[resend](https://resend.com)需要添加api_key和发送邮箱地址(from)
+#         在网站上申请密钥和验证邮箱后填入配置文件中并重启程序服务，如`systemctl restart tgbot-app`
+#         使用方式：/resend 接收邮箱地址###邮件标题###邮件正文
+#         比如：/resend abc@efg.com###全民制作人们大家好###我喜欢唱跳Rap篮球，CTRL!!!
+[resend]  #使用此方式发送不会暴露自己的真实邮箱（如：gmail），虽然也会显示代发，实际的发送地址是from，代发的地址显示为：前面随机字符@你的域名。如果使用gmail发送，代发地址会显示gmail地址
+api_key = ""
+from = ""
+# api_key = "re_********U"
+# from = "abc@efg.com"
+#目前resend限制每天免费发送100次 每月免费3000次
+
 
 
 # 以系统服务的方式运行此程序
