@@ -47,15 +47,15 @@ pub async fn ytdlp(bot: Bot, ctx: Context) -> Result<GroupIteration> {
         let file_name = "yt-dlp";
         let path = Path::new(file_name);
         if !path.exists() {
-            let err_msg = r#"
-            当前工作目录没有yt-dlp程序: 
-              ```shell
-              wget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp
-              mv ./yt-dlp /root/tgbot_app
-              cd !$
-              chomod +x yt-dlp
-              ```
-              "#;
+             let err_msg = r#"
+当前工作目录没有yt-dlp程序: 
+```shell
+wget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp
+mv ./yt-dlp /root/tgbot_app
+cd !$
+chmod +x yt-dlp
+```
+"#;
             String::from(err_msg)
         } else {
             let out = output.as_ref().unwrap().stdout.clone();

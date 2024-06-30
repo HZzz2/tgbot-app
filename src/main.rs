@@ -59,10 +59,10 @@ async fn main() -> Result<(), anyhow::Error> {
         .await
         .unwrap();
 
-    let _ = bot.set_my_name()
-        .name("TgBot-App".to_string())
-        .send()
-        .await;
+    // let _ = bot.set_my_name()
+    //     .name("TgBot-App".to_string())
+    //     .send()
+    //     .await;
     bot.set_chat_menu_button()
         .menu_button(MenuButton::MenuButtonWebApp(MenuButtonWebApp {
             text: "GitHub地址".to_string(),
