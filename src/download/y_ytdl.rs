@@ -22,7 +22,7 @@ pub async fn yt_audio(bot: &Bot, chat_id: i64, url: String) -> Result<(), String
         .await
         .unwrap();
     // 下载高质量音频格式文件
-    let pathbuf = match down_m4a(&url, VideoQuality::Highest).await {
+    let pathbuf = match down_mp3(&url, VideoQuality::Highest).await {
         Ok(pf) => pf,
         Err(e) => {
             send_err_msg(bot.clone(), chat_id, format!("Error: {:#?}", e)).await;
@@ -30,7 +30,7 @@ pub async fn yt_audio(bot: &Bot, chat_id: i64, url: String) -> Result<(), String
         }
     };
 
-    let nf = read_m4a(pathbuf).await;
+    let nf = read_audio(pathbuf).await;
     let namefile = NamedFile {
         file_name: nf.0.clone(),
         file_data: nf.1,
@@ -39,11 +39,11 @@ pub async fn yt_audio(bot: &Bot, chat_id: i64, url: String) -> Result<(), String
     if let Err(_error) = bot.send_audio(chat_id, namefile).send().await {
         // let _ = std::fs::remove_file(file);
         // 高品质音频超过50MB会发送失败，将尝试下载低品质音频
-        let pathbuf_low = down_m4a(&url, VideoQuality::Lowest)
+        let pathbuf_low = down_mp3(&url, VideoQuality::Lowest)
             .await
             .expect("下载低品质音频失败");
         // 构造发送音频参数
-        let nf_low = read_m4a(pathbuf_low).await;
+        let nf_low = read_audio(pathbuf_low).await;
         // 检测低品质音频是否超过50MB，如果超过则不发送，telegram发送限制50MB以下。超50MB需自建API服务器，难申请
         if nf_low.1.len() > 50 * 1024_usize {
             let _ = std::fs::remove_file(nf_low.0);
@@ -77,7 +77,61 @@ pub async fn yt_audio(bot: &Bot, chat_id: i64, url: String) -> Result<(), String
     Ok(())
 }
 
-async fn down_m4a(url: &String, video_quality: VideoQuality) -> Result<PathBuf> {
+// async fn down_m4a(url: &String, video_quality: VideoQuality) -> Result<PathBuf> {
+//     // 构建下载音频参数
+//     let video_options = if GLOBAL_CONFIG.y_ytdl.proxy.is_empty() {
+//         VideoOptions {
+//             quality: video_quality.clone(),
+//             filter: VideoSearchOptions::Audio,
+//             ..Default::default()
+//         }
+//     } else {
+//         let proxy = GLOBAL_CONFIG.y_ytdl.proxy.clone();
+//         if proxy.starts_with("socks5") && proxy.as_str().contains('@') {
+//             let err_msg = r#"
+//             reqwest库不支持带身份验证的socks5，请换成http/https (如果支持了请提交issuse告知我)
+//             如需使用socks5，需要不带身份验证的，比如:`socks5://1.2.3.4:1080`
+//             "#;
+//             return Err(anyhow!(err_msg));
+//             // return Err(err_msg);
+//         }
+//         VideoOptions {
+//             quality: video_quality.clone(),
+//             filter: VideoSearchOptions::Audio,
+//             request_options: RequestOptions {
+//                 client: Some(
+//                     reqwest::Client::builder()
+//                         .proxy(reqwest::Proxy::https(proxy).unwrap())
+//                         .build()
+//                         .unwrap(),
+//                 ),
+//                 ..Default::default()
+//             },
+//             ..Default::default()
+//         }
+//     };
+//     let audio = Video::new_with_options(url, video_options)?;
+//     // 获取链接标题
+//     let mut title = audio.get_info().await?.video_details.title;
+//     let mut chars: Vec<char> = title.chars().collect();
+//     // 某些链接标题过长会导致发送失败，进行截断
+//     if chars.len() > 30 {
+//         chars.truncate(30);
+//         title = chars.into_iter().collect();
+//     }
+
+//     // 如果是低质量音频则在文件名后缀添加_low标识
+//     let file_name = match video_quality {
+//         VideoQuality::Highest => format!("./{title}.m4a"),
+//         VideoQuality::Lowest => format!("./{title}_low.m4a"),
+//         _ => format!("./{title}.m4a"),
+//     };
+//     let file = std::path::PathBuf::from(&file_name);
+//     audio.download(&file).await?;
+//     Ok(file)
+// }
+
+async fn down_mp3(url: &String, video_quality: VideoQuality) -> Result<PathBuf> {
     // 构建下载音频参数
     let video_options = if GLOBAL_CONFIG.y_ytdl.proxy.is_empty() {
         VideoOptions {
@@ -122,16 +176,16 @@ async fn down_m4a(url: &String, video_quality: VideoQuality) -> Result<PathBuf> 
 
     // 如果是低质量音频则在文件名后缀添加_low标识
     let file_name = match video_quality {
-        VideoQuality::Highest => format!("./{title}.m4a"),
-        VideoQuality::Lowest => format!("./{title}_low.m4a"),
-        _ => format!("./{title}.m4a"),
+        VideoQuality::Highest => format!("./{title}.mp3"),
+        VideoQuality::Lowest => format!("./{title}_low.mp3"),
+        _ => format!("./{title}.mp3"),
     };
     let file = std::path::PathBuf::from(&file_name);
     audio.download(&file).await?;
     Ok(file)
 }
 
-async fn read_m4a(pf: PathBuf) -> (String, Vec<u8>) {
+async fn read_audio(pf: PathBuf) -> (String, Vec<u8>) {
     let mut file = File::open(&pf).await.unwrap();
     let metadata = file.metadata().await.unwrap();
     let file_size = metadata.len() as usize;
