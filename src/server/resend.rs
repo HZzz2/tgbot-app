@@ -11,7 +11,7 @@ use tgbot_app::GLOBAL_CONFIG;
 pub async fn resend(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     let msg = ctx.effective_message.unwrap();
     let chat_id = msg.chat.id;
-    if !verify_telegram(&chat_id.to_string()) {
+    if !verify_telegram(chat_id) {
         return Ok(GroupIteration::EndGroups);
     }
 

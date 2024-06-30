@@ -15,7 +15,12 @@ use tokio::fs::File;
 use tokio::io::AsyncReadExt;
 
 pub async fn yt_audio(bot: &Bot, chat_id: i64, url: String) -> Result<(), String> {
-    let msg = bot.send_message(chat_id, "正在下载音频···".to_string()).send().await.unwrap();
+    let msg = bot
+        .send_message(chat_id, "正在下载音频···".to_string())
+        .disable_notification(true)
+        .send()
+        .await
+        .unwrap();
     // 下载高质量音频格式文件
     let pathbuf = match down_m4a(&url, VideoQuality::Highest).await {
         Ok(pf) => pf,
@@ -39,6 +44,14 @@ pub async fn yt_audio(bot: &Bot, chat_id: i64, url: String) -> Result<(), String
             .expect("下载低品质音频失败");
         // 构造发送音频参数
         let nf_low = read_m4a(pathbuf_low).await;
+        // 检测低品质音频是否超过50MB，如果超过则不发送，telegram发送限制50MB以下。超50MB需自建API服务器，难申请
+        if nf_low.1.len() > 50 * 1024_usize {
+            let _ = std::fs::remove_file(nf_low.0);
+            return Err(
+                "低品质音频超过50MB，停止发送，删除低品质音频。高品质音频保存在工作目录下。"
+                    .to_string(),
+            );
+        }
         let namefile = NamedFile {
             file_name: nf_low.0.clone(),
             file_data: nf_low.1,
@@ -57,7 +70,10 @@ pub async fn yt_audio(bot: &Bot, chat_id: i64, url: String) -> Result<(), String
         let _ = std::fs::remove_file(nf.0);
     }
     // 低品质音频发送失败时，高品质音频保存在当前目录,以供上传到TG群组中，使用tdl项目
-    bot.delete_message(chat_id, msg.message_id).send().await.unwrap();
+    bot.delete_message(chat_id, msg.message_id)
+        .send()
+        .await
+        .unwrap();
     Ok(())
 }
 

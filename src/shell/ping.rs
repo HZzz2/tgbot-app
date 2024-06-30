@@ -8,7 +8,7 @@ pub async fn ping(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     // Same logic as chat applies on unwrapping effective message here.
     let msg = ctx.effective_message.unwrap();
     let chat_id = msg.chat.id;
-    if !verify_telegram(&chat_id.to_string()) {
+    if !verify_telegram(chat_id) {
         return Ok(GroupIteration::EndGroups);
     }
     let cm = msg.text.unwrap();

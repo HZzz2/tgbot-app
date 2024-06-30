@@ -9,7 +9,7 @@ pub async fn ytdlp(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     // Same logic as chat applies on unwrapping effective message here.
     let msg = ctx.effective_message.unwrap();
     let chat_id = msg.chat.id;
-    if !verify_telegram(&chat_id.to_string()) {
+    if !verify_telegram(chat_id) {
         return Ok(GroupIteration::EndGroups);
     }
     let cm = msg.text.unwrap();
@@ -32,7 +32,9 @@ pub async fn ytdlp(bot: Bot, ctx: Context) -> Result<GroupIteration> {
             .unwrap()
     });
 
-    let msg = bot.send_message(chat_id, "正在使用yt-dlp下载视频中···".to_string())
+    let msg = bot
+        .send_message(chat_id, "正在使用yt-dlp下载视频中···".to_string())
+        .disable_notification(true)
         .send()
         .await
         .unwrap();
@@ -69,7 +71,9 @@ pub async fn ytdlp(bot: Bot, ctx: Context) -> Result<GroupIteration> {
         }
     };
 
-
-    bot.edit_message_text(result).chat_id(chat_id).message_id(msg.message_id).send().await?;
+    bot.send_message(chat_id, result).parse_mode("markdown".to_string()).send().await?;
+    bot.delete_message(chat_id, msg.message_id).send().await?;
+    // 修改消息不会修改消息时间，不能知晓下载所花费的时间
+    // bot.edit_message_text(result).chat_id(chat_id).message_id(msg.message_id).send().await?;
     Ok(GroupIteration::EndGroups)
 }
