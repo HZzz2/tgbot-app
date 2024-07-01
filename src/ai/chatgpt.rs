@@ -28,7 +28,13 @@ pub async fn chatgpt(bot: Bot, ctx: Context) -> Result<GroupIteration> {
         return Ok(GroupIteration::EndGroups);
     }
     let cm = msg.text.unwrap();
-    let cm = cm[9..].trim();
+    // let cm = cm[9..].trim();
+    // 默认为AI问答，如果是从handle过来的则不去除前面的命令
+    let cm = if cm.starts_with("/chatgpt") {
+        cm[9..].trim()
+    } else {
+        cm[..].trim()
+    };
 
     let tg_content = cm;
     let client = Client::new();
