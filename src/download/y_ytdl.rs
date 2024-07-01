@@ -9,11 +9,13 @@ use rusty_ytdl::Video;
 use rusty_ytdl::VideoOptions;
 use rusty_ytdl::VideoQuality;
 use rusty_ytdl::VideoSearchOptions;
-use tgbot_app::util::send_err_msg;
-use tgbot_app::GLOBAL_CONFIG;
 use tokio::fs::File;
 use tokio::io::AsyncReadExt;
 
+use tgbot_app::util::send_err_msg;
+use tgbot_app::GLOBAL_CONFIG;
+
+// Telegram最大允许发送文件的大小，超过大小则不发
 const MAX_FILE_SIZE: usize = 50 * 1024 * 1024; // 50MB
 
 pub async fn yt_audio(bot: &Bot, chat_id: i64, url: String) -> Result<(), String> {
@@ -27,7 +29,7 @@ pub async fn yt_audio(bot: &Bot, chat_id: i64, url: String) -> Result<(), String
     let pathbuf = match down_mp3(&url, VideoQuality::Highest).await {
         Ok(pf) => pf,
         Err(e) => {
-            send_err_msg(bot.clone(), chat_id, format!("Error: {:#?}", e)).await;
+            send_err_msg(bot.clone(), chat_id, format!("下载高音质音频出错: {:#?}", e)).await;
             return Ok(());
         }
     };
@@ -161,16 +163,16 @@ async fn down_mp3(url: &String, video_quality: VideoQuality) -> Result<PathBuf> 
         }
     };
     let audio = Video::new_with_options(url, video_options)?;
-    // 获取链接标题
-    let mut title = audio.get_info().await?.video_details.title;
+    // 获取链接标题,“/”在标题中会有转义问题，换成“-”
+    let mut title = audio.get_info().await?.video_details.title.replace('/', "-");
     let mut chars: Vec<char> = title.chars().collect();
-    // 某些链接标题过长会导致发送失败，进行截断
+    // 某些链接标题过长会导致在Telegram发送时失败，进行截断
     if chars.len() > 30 {
         chars.truncate(30);
         title = chars.into_iter().collect();
     }
 
-    // 如果是低质量音频则在文件名后缀添加_low标识
+    // 如果是低质量音频则在文件名后添加_low标识
     let file_name = match video_quality {
         VideoQuality::Highest => format!("./{title}.mp3"),
         VideoQuality::Lowest => format!("./{title}_low.mp3"),
@@ -189,5 +191,6 @@ async fn read_audio(pf: PathBuf) -> (String, Vec<u8>) {
     let mut buffer = Vec::with_capacity(file_size);
     // 读取整个文件内容
     file.read_to_end(&mut buffer).await.unwrap();
+    // 文件名，文件内容
     (pf.clone().to_str().unwrap().to_string(), buffer)
 }

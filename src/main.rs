@@ -1,4 +1,4 @@
-use ferrisgram::types::{BotCommand, MenuButton, MenuButtonWebApp, WebAppInfo};
+use ferrisgram::types::BotCommand;
 use tgbot_app::GLOBAL_CONFIG;
 // use ferrisgram::error::{GroupIteration, Result};
 use ferrisgram::ext::filters::message;
@@ -26,6 +26,10 @@ pub use download::{yt_audio, ytdlp};
 pub mod server;
 use anyhow::Result;
 pub use server::resend;
+
+pub mod osint;
+pub use osint::ip;
+
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
     // 获取配置文件信息
@@ -59,25 +63,22 @@ async fn main() -> Result<(), anyhow::Error> {
         .await
         .unwrap();
 
-    // let _ = bot.set_my_name()
-    //     .name("TgBot-App".to_string())
-    //     .send()
-    //     .await;
-    bot.set_chat_menu_button()
-        .menu_button(MenuButton::MenuButtonWebApp(MenuButtonWebApp {
-            text: "GitHub地址".to_string(),
-            web_app: WebAppInfo {
-                url: "https://github.com/HZzz2/tgbot-app".to_string(),
-            },
-        }));
-    bot.set_chat_menu_button()
-        .menu_button(MenuButton::MenuButtonWebApp(MenuButtonWebApp {
-            text: "作者地址".to_string(),
-            web_app: WebAppInfo {
-                url: "https://github.com/HZzz2".to_string(),
-            },
-        }));
-    // bot.set_my_commands(vec![BotCommand{command:"resend".to_string(),description:"使用resen发送邮件，需申请设置api和发件地址".to_string()}]).send().await.unwrap();
+
+    // bot.set_chat_menu_button()
+    //     .menu_button(MenuButton::MenuButtonWebApp(MenuButtonWebApp {
+    //         text: "GitHub地址".to_string(),
+    //         web_app: WebAppInfo {
+    //             url: "https://github.com/HZzz2/tgbot-app".to_string(),
+    //         },
+    //     }));
+    // bot.set_chat_menu_button()
+    //     .menu_button(MenuButton::MenuButtonWebApp(MenuButtonWebApp {
+    //         text: "作者地址".to_string(),
+    //         web_app: WebAppInfo {
+    //             url: "https://github.com/HZzz2".to_string(),
+    //         },
+    //     }));
+
     // 调度程序是更新程序内部功能的一部分
     // 您可以使用它来添加处理程序。
     let dispatcher = &mut Dispatcher::new(&bot);
@@ -113,6 +114,14 @@ async fn main() -> Result<(), anyhow::Error> {
     botcommadns.push(BotCommand {
         command: "shell".to_string(),
         description: "执行任意shell命令".to_string(),
+    });
+
+
+    // osint
+    dispatcher.add_handler(CommandHandler::new("ip", ip));
+    botcommadns.push(BotCommand{
+        command: "ip".to_string(),
+        description: "获取ip信息，地理位置".to_string()
     });
 
     // ai

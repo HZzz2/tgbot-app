@@ -1,24 +1,7 @@
-use reqwest::Client;
-use serde::{Deserialize, Serialize};
-
+use ferrisgram::error::Result;
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
 
-use ferrisgram::error::Result;
-use tgbot_app::util::verify_telegram;
-use tgbot_app::GLOBAL_CONFIG;
-
-#[derive(Serialize, Deserialize)]
-pub struct RequestBody {
-    pub model: String,
-    pub messages: Vec<Messages>,
-    pub temperature: Option<f32>,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct Messages {
-    pub role: String,
-    pub content: String,
-}
+use tgbot_app::util::{ai_q_s, verify_telegram};
 
 pub async fn chatgpt(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     // Same logic as chat applies on unwrapping effective message here.
@@ -36,32 +19,12 @@ pub async fn chatgpt(bot: Bot, ctx: Context) -> Result<GroupIteration> {
         cm[..].trim()
     };
 
-    let tg_content = cm;
-    let client = Client::new();
-    let api_key = &GLOBAL_CONFIG.openai.api_key;
-    let msg = Messages {
-        role: "user".to_string(),
-        content: tg_content.to_string(),
-    };
-    let request_body = RequestBody {
-        model: GLOBAL_CONFIG.openai.model.clone(),
-        messages: vec![msg],
-        temperature: Some(0.7),
-    };
-    let res = client
-        .post(&GLOBAL_CONFIG.openai.base_url)
-        .header("Authorization", "Bearer ".to_string() + api_key)
-        .header("Content-Type", "application/json")
-        .json(&request_body)
-        .send()
-        .await
-        .unwrap();
-    let response_body = res.json::<serde_json::Value>().await.unwrap();
-    let rep = response_body["choices"][0]["message"]["content"]
-        .as_str()
-        .unwrap();
-
-    bot.send_message(chat_id, rep.to_string()).send().await?;
-
+    // let _ = ai_q_s(&bot, chat_id, cm).await;
+    let ai_result = ai_q_s(cm).await;
+    if let Ok(ai_answer) = ai_result{
+        let _ = bot.send_message(chat_id, ai_answer).send().await;
+    }else {
+        let _ = bot.send_message(chat_id, "AI请求失败".to_string()).send().await;
+    }
     Ok(GroupIteration::EndGroups)
 }
