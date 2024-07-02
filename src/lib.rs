@@ -14,7 +14,6 @@ pub static GLOBAL_CONFIG: Lazy<Arc<Config>> = Lazy::new(|| {
     Arc::new(config)
 });
 
-
 // 反序列化配置信息
 #[derive(Deserialize, Debug)]
 pub struct Config {
@@ -63,5 +62,5 @@ pub struct YYtdl {
 #[derive(Deserialize, Debug)]
 pub struct ReSend {
     pub api_key: String,
-    pub from: String
+    pub from: String,
 }

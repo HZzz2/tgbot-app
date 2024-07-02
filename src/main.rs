@@ -1,8 +1,9 @@
+use ferrisgram::ext::filters::callback_query::All;
 use ferrisgram::types::BotCommand;
 use tgbot_app::GLOBAL_CONFIG;
 // use ferrisgram::error::{GroupIteration, Result};
 use ferrisgram::ext::filters::message;
-use ferrisgram::ext::handlers::{CommandHandler, MessageHandler};
+use ferrisgram::ext::handlers::{CallbackQueryHandler, CommandHandler, MessageHandler};
 use ferrisgram::ext::{Dispatcher, Updater};
 // use ferrisgram::types::LinkPreviewOptions;
 use ferrisgram::Bot;
@@ -14,6 +15,8 @@ mod handler;
 mod start;
 use handler::handler;
 use start::start;
+mod callback_handler;
+use callback_handler::callback_handler;
 
 mod shell;
 use shell::{c, ls, ping, shell};
@@ -28,7 +31,7 @@ use anyhow::Result;
 pub use server::resend;
 
 pub mod osint;
-pub use osint::ip;
+pub use osint::{dns, ip};
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
@@ -42,14 +45,13 @@ async fn main() -> Result<(), anyhow::Error> {
         Err(error) => panic!("无法创建bot: {}", error),
     };
     let short_des = r#"
-机器人开源地址：https://github.com/HZzz2/tgbot-app
-欢迎提交功能请求，优化建议, BUG，PR
+开源地址:https://github.com/HZzz2/tgbot-app
 "#
     .to_string();
     let des: String = r#"
 机器人开源地址： https://github.com/HZzz2/tgbot-app
 欢迎提交功能请求，优化建议, BUG，PR
-可通过机器人执行shell命令，常用命令设置，发送邮件，下载音频或视频
+可通过机器人执行shell命令，信息手机，常用命令设置，发送邮件，下载音频或视频
     "#
     .to_string();
     bot.set_my_description()
@@ -62,7 +64,6 @@ async fn main() -> Result<(), anyhow::Error> {
         .send()
         .await
         .unwrap();
-
 
     // bot.set_chat_menu_button()
     //     .menu_button(MenuButton::MenuButtonWebApp(MenuButtonWebApp {
@@ -116,12 +117,17 @@ async fn main() -> Result<(), anyhow::Error> {
         description: "执行任意shell命令".to_string(),
     });
 
-
     // osint
     dispatcher.add_handler(CommandHandler::new("ip", ip));
-    botcommadns.push(BotCommand{
+    botcommadns.push(BotCommand {
         command: "ip".to_string(),
-        description: "获取ip信息，地理位置".to_string()
+        description: "获取ip信息，地理位置".to_string(),
+    });
+
+    dispatcher.add_handler(CommandHandler::new("dns", dns));
+    botcommadns.push(BotCommand {
+        command: "dns".to_string(),
+        description: "获取DNS信息".to_string(),
     });
 
     // ai
@@ -155,6 +161,10 @@ async fn main() -> Result<(), anyhow::Error> {
             // contain either text or a caption.
             message::Text::filter().or(message::Caption::filter()),
         ),
+        1,
+    );
+    dispatcher.add_handler_to_group(
+        CallbackQueryHandler::new(callback_handler, All::filter()),
         1,
     );
 

@@ -18,22 +18,28 @@ pub async fn ip(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     } else {
         cm[..].trim()
     };
-    let ipinfo_json_data: Value = match reqwest::get(format!(r"https://ipinfo.io/widget/demo/{}", ip))
-        .await
-        .unwrap()
-        .json()
-        .await
+    let ipinfo_json_data: Value =
+        match reqwest::get(format!(r"https://ipinfo.io/widget/demo/{}", ip))
+            .await
+            .unwrap()
+            .json()
+            .await
         {
-            Ok(v)=> v,
-            Err(e)=>{
-                let e_msg = format!("获取IP-json数据失败，抓的接口，不能频繁查询：{:?}",e);
+            Ok(v) => v,
+            Err(e) => {
+                let e_msg = format!("获取IP-json数据失败，抓的接口，不能频繁查询：{:?}", e);
                 let _ = send_err_msg(bot, chat_id, e_msg).await;
                 return Ok(GroupIteration::EndGroups);
             }
         };
 
     let jdata = serde_json::to_string_pretty(&ipinfo_json_data).unwrap();
-    bot.send_message(chat_id, jdata.clone()).send().await?;
+    bot.send_message(
+        chat_id,
+        format!("ipinfo接口，不要频繁调用{}", jdata.clone()),
+    )
+    .send()
+    .await?;
     if let Some(loc_str) = ipinfo_json_data["data"]["loc"].as_str() {
         let loc: Vec<f64> = loc_str
             .split(',')
@@ -56,9 +62,13 @@ ASN信息
 请用3-5句话概括最关键的发现。(以markdown格式回复我)
     "#;
     let ai_result = ai_q_s(format!("{}：{}", prompt, jdata)).await;
-    if let Ok(ai_answer) = ai_result{
-        let _ = bot.send_message(chat_id, format!("AI总结json：\n{}",ai_answer)).send().await;
+    if let Ok(ai_answer) = ai_result {
+        let _ = bot
+            .send_message(chat_id, format!("AI总结：\n{}", ai_answer))
+            .parse_mode("markdown".to_string())
+            .send()
+            .await;
     }
-    
+
     Ok(GroupIteration::EndGroups)
 }

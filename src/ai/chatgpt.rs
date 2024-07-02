@@ -21,10 +21,13 @@ pub async fn chatgpt(bot: Bot, ctx: Context) -> Result<GroupIteration> {
 
     // let _ = ai_q_s(&bot, chat_id, cm).await;
     let ai_result = ai_q_s(cm).await;
-    if let Ok(ai_answer) = ai_result{
+    if let Ok(ai_answer) = ai_result {
         let _ = bot.send_message(chat_id, ai_answer).send().await;
-    }else {
-        let _ = bot.send_message(chat_id, "AI请求失败".to_string()).send().await;
+    } else {
+        let _ = bot
+            .send_message(chat_id, "AI请求失败".to_string())
+            .send()
+            .await;
     }
     Ok(GroupIteration::EndGroups)
 }

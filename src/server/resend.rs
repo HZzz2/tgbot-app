@@ -33,7 +33,7 @@ pub async fn resend(bot: Bot, ctx: Context) -> Result<GroupIteration> {
 
     let all_content = msg.text.unwrap();
     let use_content: Vec<&str> = all_content[8..].split("###").map(|c| c.trim()).collect();
-    if use_content.len() != 3{
+    if use_content.len() != 3 {
         let msg = r#"
         使用方式：`/resend 接收邮箱地址###邮件标题###邮件正文`
         比如：`/resend abc@efg.com###全民制作人们大家好###我喜欢唱跳Rap篮球，CTRL!!!`

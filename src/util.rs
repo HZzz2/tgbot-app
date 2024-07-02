@@ -1,7 +1,7 @@
-use std::fmt::Display;
-use serde::{Deserialize,Serialize};
 use ferrisgram::Bot;
 use reqwest::Client;
+use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 
 use crate::GLOBAL_CONFIG;
 
@@ -17,8 +17,7 @@ pub async fn send_err_msg<T: Display>(bot: Bot, chat_id: i64, msg: T) {
 
 // 验证ID是否存在于配置文件中
 #[inline]
-pub fn verify_telegram(id: i64) -> bool
-{
+pub fn verify_telegram(id: i64) -> bool {
     GLOBAL_CONFIG.telegram.ids.contains(&id)
 }
 
@@ -35,8 +34,8 @@ pub struct Messages {
     pub content: String,
 }
 
-pub async fn ai_q_s<T:Into<String>>(content:T)->anyhow::Result<String>{
-let tg_content = content.into();
+pub async fn ai_q_s<T: Into<String>>(content: T) -> anyhow::Result<String> {
+    let tg_content = content.into();
     let client = Client::new();
     let api_key = &GLOBAL_CONFIG.openai.api_key;
     let msg = Messages {

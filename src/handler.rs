@@ -19,9 +19,10 @@ pub async fn handler(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     let content = content.trim();
 
     // 斜杠视为命令
-    if content.starts_with('/') {
-        return Ok(GroupIteration::EndGroups);
-    }
+    // if content.starts_with('/') {
+    //     return Ok(GroupIteration::EndGroups);
+    // }
+    // println!("handler content:{}",content);
 
     // 如果是油管链接则下载m4a音频格式并发送   网页版或手机版链接
     if content.starts_with(r"https://www.youtube.com") || content.starts_with(r"https://youtu.be") {
@@ -38,7 +39,6 @@ pub async fn handler(bot: Bot, ctx: Context) -> Result<GroupIteration> {
 
     //todo! 默认为AI问答
     let _ = chatgpt(bot, ctx).await;
-
 
     // Every api method creates a builder which contains various parameters of that respective method.
     // bot.copy_message(chat.id, chat.id, msg.message_id)

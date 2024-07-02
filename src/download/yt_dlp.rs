@@ -47,7 +47,7 @@ pub async fn ytdlp(bot: Bot, ctx: Context) -> Result<GroupIteration> {
         let file_name = "yt-dlp";
         let path = Path::new(file_name);
         if !path.exists() {
-             let err_msg = r#"
+            let err_msg = r#"
 当前工作目录没有yt-dlp程序: 
 ```shell
 wget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp
@@ -71,7 +71,10 @@ chmod +x yt-dlp
         }
     };
 
-    bot.send_message(chat_id, result).parse_mode("markdown".to_string()).send().await?;
+    bot.send_message(chat_id, result)
+        .parse_mode("markdown".to_string())
+        .send()
+        .await?;
     bot.delete_message(chat_id, msg.message_id).send().await?;
     // 修改消息不会修改消息时间，不能知晓下载所花费的时间
     // bot.edit_message_text(result).chat_id(chat_id).message_id(msg.message_id).send().await?;

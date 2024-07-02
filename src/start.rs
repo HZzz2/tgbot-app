@@ -1,7 +1,7 @@
 use ferrisgram::error::Result;
-use ferrisgram::{error::GroupIteration, ext::Context, input_file::NamedFile, Bot};
+use ferrisgram::{error::GroupIteration, ext::Context, Bot};
 use tgbot_app::util::verify_telegram;
-use tokio::{fs::File, io::AsyncReadExt};
+// use tokio::{fs::File, io::AsyncReadExt};
 
 // This is our callable function for the command handler that we declared earlier
 // It will be triggered when someone send /start to the bot.
@@ -12,6 +12,11 @@ pub async fn start(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     if !verify_telegram(chat_id) {
         return Ok(GroupIteration::EndGroups);
     }
+    bot.send_message(chat_id, "start test reply".to_string())
+        .send()
+        .await
+        .unwrap();
+
     //     let mut link_preview_options = LinkPreviewOptions::new();
     //     link_preview_options.is_disabled = Some(true);
     //     // Ferrisgram offers some custom helpers which make your work easy
@@ -31,22 +36,22 @@ pub async fn start(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     // bot.send_photo(chat_id, "cat.jpg").send().await?;
     // bot.send_audio(chat_id, "许嵩-有何不可.mp3").send().await?;
 
-    let mut file = File::open("./许嵩-有何不可.mp3").await.unwrap();
-    let metadata = file.metadata().await.unwrap();
-    let file_size = metadata.len() as usize;
+    // let mut file = File::open("./许嵩-有何不可.mp3").await.unwrap();
+    // let metadata = file.metadata().await.unwrap();
+    // let file_size = metadata.len() as usize;
 
-    // 创建一个足够大的 buffer
-    let mut buffer = Vec::with_capacity(file_size);
+    // // 创建一个足够大的 buffer
+    // let mut buffer = Vec::with_capacity(file_size);
 
-    // 读取整个文件内容
-    file.read_to_end(&mut buffer).await.unwrap();
+    // // 读取整个文件内容
+    // file.read_to_end(&mut buffer).await.unwrap();
 
-    let namefile = NamedFile {
-        file_name: "许嵩-有何不可.mp3".to_string(),
-        file_data: buffer,
-    };
+    // let namefile = NamedFile {
+    //     file_name: "许嵩-有何不可.mp3".to_string(),
+    //     file_data: buffer,
+    // };
 
-    bot.send_audio(chat_id, namefile).send().await?;
+    // bot.send_audio(chat_id, namefile).send().await?;
     // GroupIteration::EndGroups will end iteration of groups for an update.
     // This means that rest of the pending groups and their handlers won't be checked
     // for this particular update.
