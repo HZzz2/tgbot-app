@@ -31,7 +31,7 @@ pub async fn callback_handler(bot: Bot, ctx: Context) -> Result<GroupIteration> 
         ["AI总结","PROMPT_SHELL_OUTPUT"] => {
             let res = ai_q_s(format!("{}:\n{}",PROMPT_SHELL_OUTPUT,raw_content)).await.unwrap();
             let _ = bot
-                .send_message(chat_id, format!("AI总结：{}", res))
+                .send_message(chat_id, res)
                 .parse_mode("markdown".to_string())
                 .send()
                 .await;
@@ -39,7 +39,7 @@ pub async fn callback_handler(bot: Bot, ctx: Context) -> Result<GroupIteration> 
         ["AI总结",prompt] => {
             let res = ai_q_s(format!("{}:\n{}",prompt,raw_content)).await.unwrap();
             let _ = bot
-                .send_message(chat_id, format!("AI总结：{}", res))
+                .send_message(chat_id, res)
                 .parse_mode("markdown".to_string())
                 .send()
                 .await;
