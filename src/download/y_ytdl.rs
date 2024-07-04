@@ -176,7 +176,7 @@ async fn down_mp3(url: &String, video_quality: VideoQuality) -> Result<PathBuf> 
         .await?
         .video_details
         .title
-        .replace('/', "-");
+        .replace(['/', '⧸'], "-");
     let mut chars: Vec<char> = title.chars().collect();
     // 某些链接标题过长会导致在Telegram发送时失败，进行截断
     if chars.len() > 30 {

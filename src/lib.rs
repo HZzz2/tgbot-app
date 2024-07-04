@@ -15,7 +15,7 @@ pub static GLOBAL_CONFIG: Lazy<Arc<Config>> = Lazy::new(|| {
 });
 
 // 反序列化配置信息
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Config {
     pub telegram: Telegram, // TG相关配置信息
     pub openai: Chatgpt,    // AI相关配置信息
@@ -26,40 +26,41 @@ pub struct Config {
     pub resend: ReSend,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Telegram {
     pub bot_token: String,
     pub ids: HashSet<i64>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Chatgpt {
     pub base_url: String,
     pub model: String,
     pub api_key: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Command {
     pub cmd: BTreeMap<String, String>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct BruteForce {
     pub ssh: HashMap<String, String>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct YtDlp {
+    pub cookie: String,
     pub proxy: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct YYtdl {
     pub proxy: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct ReSend {
     pub api_key: String,
     pub from: String,

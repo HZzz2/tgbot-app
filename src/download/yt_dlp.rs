@@ -15,13 +15,15 @@ pub async fn ytdlp(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     let cm = msg.text.unwrap();
     let link = cm[7..].trim();
 
-    let com = if GLOBAL_CONFIG.yt_dlp.proxy.is_empty() {
-        format!(r#"./yt-dlp {}"#, link)
-    } else {
-        format!(
-            r#"./yt-dlp --proxy {} {}"#,
-            GLOBAL_CONFIG.yt_dlp.proxy, link
-        )
+    let cookie = GLOBAL_CONFIG.yt_dlp.cookie.as_str();
+    let proxy = GLOBAL_CONFIG.yt_dlp.proxy.as_str();
+    let com = match (cookie, proxy) {
+        (ck, px) if !ck.is_empty() && !px.is_empty() => {
+            format!(r#"./yt-dlp --cookies {} --proxy {} {}"#, ck, px, link)
+        }
+        (ck, _) if !ck.is_empty() => format!(r#"./yt-dlp --cookies {} {}"#, ck, link),
+        (_, px) if !px.is_empty() => format!(r#"./yt-dlp --proxy {} {}"#, px, link),
+        _ => format!(r#"./yt-dlp {}"#, link),
     };
 
     let task = tokio::task::spawn_blocking(move || {

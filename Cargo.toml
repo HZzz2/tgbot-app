@@ -1,6 +1,6 @@
 [package]
 name = "tgbot-app"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["HZzz2", "Leslie"]
 # default-run = "tgbot-app"
