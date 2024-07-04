@@ -14,6 +14,9 @@ pub static GLOBAL_CONFIG: Lazy<Arc<Config>> = Lazy::new(|| {
     Arc::new(config)
 });
 
+// telegram单条消息长度不能超过4096个字符
+pub const MESSAGE_LEN:usize = 4000;
+
 // 反序列化配置信息
 #[derive(Deserialize, Debug, Clone)]
 pub struct Config {

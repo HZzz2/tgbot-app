@@ -1,7 +1,8 @@
 use ferrisgram::error::Result;
 use ferrisgram::types::{InlineKeyboardButton, InlineKeyboardMarkup};
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
-use tgbot_app::util::verify_telegram;
+use tgbot_app::util::{chunks_msg, verify_telegram};
+use tgbot_app::MESSAGE_LEN;
 use tokio::process::Command;
 
 
@@ -18,13 +19,17 @@ pub async fn dns(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     } else {
         cm[..].trim()
     };
-    let button_start = InlineKeyboardButton::callback_button(
+    let button_dnsrecon = InlineKeyboardButton::callback_button(
         "dnsrecon",
         format!("osint dns cb_dnsrecon {}", d).as_str(),
     );
-    let button_google = InlineKeyboardButton::url_button("Google", "https://google.com");
+    let button_dnsenum = InlineKeyboardButton::callback_button(
+        "dnsenum",
+        format!("osint dns cb_dnsenum {}", d).as_str(),
+    );
+    // let button_google = InlineKeyboardButton::url_button("Google", "https://google.com");
 
-    let button_baidu = InlineKeyboardButton::url_button("百度", "https://baidu.com");
+    // let button_baidu = InlineKeyboardButton::url_button("百度", "https://baidu.com");
 
     let dig_output = Command::new("dig")
         .arg(d)
@@ -52,8 +57,7 @@ pub async fn dns(bot: Bot, ctx: Context) -> Result<GroupIteration> {
         format!("nslookup:{}", String::from_utf8_lossy(&nslookup_output)),
     )
     .reply_markup(InlineKeyboardMarkup::new(vec![
-        vec![button_start],
-        vec![button_google, button_baidu],
+        vec![button_dnsrecon,button_dnsenum],
     ]))
     .send()
     .await?;
@@ -61,7 +65,6 @@ pub async fn dns(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     Ok(GroupIteration::EndGroups)
 }
 
-// 是否加一个将输出的内容报存到文件并发送呢？   内容过长
 pub async fn cb_dnsenum(arg: &str, bot: Bot, chat_id: i64) -> Result<GroupIteration> {
     let dnsenum_output = Command::new("dnsenum")
         .args(["--reserver", arg]) // --reserver进行反向解析 加快扫描速度。保存文件的话可以不加此参数？
@@ -70,10 +73,17 @@ pub async fn cb_dnsenum(arg: &str, bot: Bot, chat_id: i64) -> Result<GroupIterat
         .expect("dnsenum命令执行失败")
         .stdout;
 
+    if dnsenum_output.len() > MESSAGE_LEN{
+        let _ = chunks_msg(&bot, chat_id, String::from_utf8_lossy(&dnsenum_output)).await;
+        return Ok(GroupIteration::EndGroups)
+    }
+    let button_ai = InlineKeyboardButton::callback_button("AI总结", "AI总结 PROMPT_SHELL_OUTPUT");
+
     bot.send_message(
         chat_id,
         format!("dnsenum:{}", String::from_utf8_lossy(&dnsenum_output)),
     )
+    .reply_markup(InlineKeyboardMarkup::new(vec![vec![button_ai]]))
     .send()
     .await?;
 
@@ -88,7 +98,14 @@ pub async fn cb_dnsrecon(arg: &str, bot: Bot, chat_id: i64) -> Result<GroupItera
         .expect("dnsrecon命令执行失败")
         .stdout;
 
-    let button_ai = InlineKeyboardButton::callback_button("AI总结", "AI总结 PROMPT_SHELL_OUTPUT");
+    
+    if dnsrecon_output.len() > MESSAGE_LEN{
+        let _ = chunks_msg(&bot, chat_id, String::from_utf8_lossy(&dnsrecon_output)).await;
+        return Ok(GroupIteration::EndGroups);
+    }
+
+    let button_ai: InlineKeyboardButton = InlineKeyboardButton::callback_button("AI总结", "AI总结 PROMPT_SHELL_OUTPUT");
+
     bot.send_message(
         chat_id,
         format!("dnsrecon:{}", String::from_utf8_lossy(&dnsrecon_output)),
