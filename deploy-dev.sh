@@ -4,7 +4,7 @@
 set -e
 
 # 编译项目
-echo "构建项目..."
+echo "构建tgbot-app项目..."
 cargo build -r
 
 # 停止服务
