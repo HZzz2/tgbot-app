@@ -1,5 +1,5 @@
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
-use tgbot_app::util::{send_err_msg, verify_telegram};
+use tgbot_app::util::{chunks_msg, send_err_msg, verify_telegram};
 use tokio::process::Command;
 use ferrisgram::error::Result;
 use std::time::Instant;
@@ -53,10 +53,7 @@ pub async fn shell(bot: Bot, ctx: Context) -> Result<GroupIteration> {
             );
 
             // 分段发送消息
-            for chunk in message.chars().collect::<Vec<char>>().chunks(4000) {
-                let chunk_str: String = chunk.iter().collect();
-                bot.send_message(chat_id, chunk_str).send().await?;
-            }
+            let _ = chunks_msg(&bot, chat_id, message).await;
         }
         Err(e) => {
             send_err_msg(bot, chat_id, format!("命令执行失败: {:?}", e)).await;

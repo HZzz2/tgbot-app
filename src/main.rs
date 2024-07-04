@@ -1,3 +1,4 @@
+use download::aria2c;
 use ferrisgram::ext::filters::callback_query::All;
 use ferrisgram::types::BotCommand;
 use tgbot_app::GLOBAL_CONFIG;
@@ -127,14 +128,14 @@ async fn main() -> Result<(), anyhow::Error> {
     dispatcher.add_handler(CommandHandler::new("dns", dns));
     botcommadns.push(BotCommand {
         command: "dns".to_string(),
-        description: "获取DNS信息".to_string(),
+        description: "获取DNS相关信息".to_string(),
     });
 
     // ai
     dispatcher.add_handler(CommandHandler::new("chatgpt", chatgpt));
     botcommadns.push(BotCommand {
         command: "chatgpt".to_string(),
-        description: "chatgpt 大语言模型".to_string(),
+        description: "chatgpt openai模型".to_string(),
     });
 
     // download
@@ -143,11 +144,17 @@ async fn main() -> Result<(), anyhow::Error> {
         command: "ytdlp".to_string(),
         description: "使用yt-dlp下载画质最佳视频，需下载yt-dlp到工作目录".to_string(),
     });
+
+    dispatcher.add_handler(CommandHandler::new("aria2c",aria2c));
+    botcommadns.push(BotCommand {
+        command: "aria2c".to_string(),
+        description: "使用aria2c下载文件，支持 HTTP/HTTPS、FTP、SFTP、BitTorrent 和 Metalink,默认16线程，下载的文件在aria2c_download目录下".to_string(),
+    });
     // server
     dispatcher.add_handler(CommandHandler::new("resend", resend));
     botcommadns.push(BotCommand {
         command: "resend".to_string(),
-        description: "使用resen发送邮件，需申请设置api和发件地址".to_string(),
+        description: "使用resend发送邮件，需申请设置api和发件地址".to_string(),
     });
 
     bot.set_my_commands(botcommadns).send().await.unwrap();

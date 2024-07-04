@@ -65,8 +65,8 @@ chmod +x yt-dlp
             format!(
                 "
             *视频下载失败*:
-            stdout: {:#?}
-            stderr: {:#?}
+            stdout: {:?}
+            stderr: {:?}
             ",
                 out, err
             )

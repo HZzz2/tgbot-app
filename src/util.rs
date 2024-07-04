@@ -21,6 +21,14 @@ pub fn verify_telegram(id: i64) -> bool {
     GLOBAL_CONFIG.telegram.ids.contains(&id)
 }
 
+// 分段消息的发送，telegram单条最多4,096个字符
+pub async fn chunks_msg<T: AsRef<str>>(bot: &Bot, chat_id: i64, message: T) {
+    for chunk in message.as_ref().chars().collect::<Vec<char>>().chunks(4000) {
+        let chunk_str: String = chunk.iter().collect();
+        let _ = bot.send_message(chat_id, chunk_str).send().await;
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct RequestBody {
     pub model: String,
