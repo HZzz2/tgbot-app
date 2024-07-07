@@ -14,7 +14,7 @@ pub async fn ping(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     let cm = msg.text.unwrap();
     let cm = &cm[7..].trim();
 
-    let output = Command::new("/usr/bin/ping")
+    let output = Command::new("ping")
         .args(["-c", "4", cm])
         .output()
         .await

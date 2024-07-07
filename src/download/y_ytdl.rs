@@ -46,49 +46,52 @@ pub async fn yt_audio(bot: &Bot, chat_id: i64, url: String) -> Result<(), String
     };
     // 高音频小于50MB则发送，大于则下载低音质
     if nf.1.len() < MAX_FILE_SIZE {
-        // 如果发送失败则下载低质量音频发送
-        if let Err(_error) = bot
+        match bot
             .send_audio(chat_id, namefile)
             .disable_notification(true)
             .send()
             .await
         {
-            // 发送失败则下载低品质音频
-            let pathbuf_low = down_mp3(&url, VideoQuality::Lowest)
-                .await
-                .expect("下载低品质音频失败");
-            // 构造发送音频参数
-            let nf_low = read_audio(pathbuf_low).await;
-            // 检测低品质音频是否超过50MB，如果超过则不发送，telegram发送限制50MB以下。超50MB需自建API服务器，难申请
-            if nf_low.1.len() > MAX_FILE_SIZE {
-                let _ = std::fs::remove_file(nf_low.0);
-                return Err(
-                    "低品质音频超过50MB，停止发送，删除低品质音频。高品质音频保存在工作目录下。"
-                        .to_string(),
-                );
-            }
-            let namefile_low = NamedFile {
-                file_name: nf_low.0.clone(),
-                file_data: nf_low.1,
-            };
-            // 如果低音质发送失败则发送一条消息提示
-            if let Err(error) = bot
-                .send_audio(chat_id, namefile_low)
-                .disable_notification(true)
-                .send()
-                .await
-            {
-                let _ = tokio::fs::remove_file(nf_low.0).await;
-                return Err(format!(
-                    "低品质音频发送失败，高品质音频保存在工作目录下。错误：{:#?}",
-                    error
-                ));
-            } else {
+            Ok(_) => {
+                // 成功发送高品质音频后则删除文件
                 let _ = tokio::fs::remove_file(nf.0).await;
-                let _ = tokio::fs::remove_file(nf_low.0).await;
             }
-        } else {
-            let _ = tokio::fs::remove_file(nf.0).await;
+            Err(_) => {
+                //发送失败则下载低品质音频
+                let pathbuf_low = down_mp3(&url, VideoQuality::Lowest)
+                    .await
+                    .expect("下载低品质音频失败");
+                // 构造发送音频参数
+                let nf_low = read_audio(pathbuf_low).await;
+                // 检测低品质音频是否超过50MB，如果超过则不发送，telegram发送限制50MB以下。超50MB需自建API服务器，难申请
+                if nf_low.1.len() > MAX_FILE_SIZE {
+                    if !GLOBAL_CONFIG.y_ytdl.hight_audio_save {
+                        let _ = std::fs::remove_file(nf.0);
+                    }
+                    let _ = std::fs::remove_file(nf_low.0);
+                    return Err("低品质音频超过50MB，停止发送，删除低品质音频。".to_string());
+                }
+                let namefile_low = NamedFile {
+                    file_name: nf_low.0.clone(),
+                    file_data: nf_low.1,
+                };
+                // 如果低音质发送失败则发送一条消息提示
+                if let Err(error) = bot
+                    .send_audio(chat_id, namefile_low)
+                    .disable_notification(true)
+                    .send()
+                    .await
+                {
+                    if !GLOBAL_CONFIG.y_ytdl.hight_audio_save {
+                        let _ = std::fs::remove_file(nf.0);
+                    }
+                    let _ = tokio::fs::remove_file(nf_low.0).await;
+                    return Err(format!("低品质音频发送失败。错误：{:#?}", error));
+                } else {
+                    let _ = tokio::fs::remove_file(nf.0).await;
+                    let _ = tokio::fs::remove_file(nf_low.0).await;
+                }
+            }
         }
     } else {
         // 高品质音频超过50MB会发送失败，将尝试下载低品质音频
@@ -99,11 +102,11 @@ pub async fn yt_audio(bot: &Bot, chat_id: i64, url: String) -> Result<(), String
         let nf_low = read_audio(pathbuf_low).await;
         // 检测低品质音频是否超过50MB，如果超过则不发送，telegram发送限制50MB以下。超50MB需自建API服务器，难申请
         if nf_low.1.len() > MAX_FILE_SIZE {
+            if !GLOBAL_CONFIG.y_ytdl.hight_audio_save {
+                let _ = std::fs::remove_file(nf.0);
+            }
             let _ = std::fs::remove_file(nf_low.0);
-            return Err(
-                "低品质音频超过50MB，停止发送，删除低品质音频。高品质音频保存在工作目录下。"
-                    .to_string(),
-            );
+            return Err("低品质音频超过50MB，停止发送，删除低品质音频。".to_string());
         }
         let namefile_low = NamedFile {
             file_name: nf_low.0.clone(),
@@ -116,11 +119,11 @@ pub async fn yt_audio(bot: &Bot, chat_id: i64, url: String) -> Result<(), String
             .send()
             .await
         {
+            if !GLOBAL_CONFIG.y_ytdl.hight_audio_save {
+                let _ = std::fs::remove_file(nf.0);
+            }
             let _ = tokio::fs::remove_file(nf_low.0).await;
-            return Err(format!(
-                "低品质音频发送失败，高品质音频保存在工作目录下。错误：{:#?}",
-                error
-            ));
+            return Err(format!("低品质音频发送失败。错误：{:#?}", error));
         } else {
             let _ = tokio::fs::remove_file(nf.0).await;
             let _ = tokio::fs::remove_file(nf_low.0).await;

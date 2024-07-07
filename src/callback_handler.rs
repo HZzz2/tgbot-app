@@ -3,7 +3,7 @@ use ferrisgram::{error::GroupIteration, ext::Context, Bot};
 use tgbot_app::util::{ai_q_s, verify_telegram};
 
 use crate::ai::PROMPT_SHELL_OUTPUT;
-use crate::osint::{cb_dnsenum, cb_dnsrecon};
+use crate::osint::{cb_dnsenum, cb_dnsrecon, cb_ip123};
 // use crate::{ai::chatgpt, yt_audio};
 
 // 消息处理函数
@@ -22,13 +22,16 @@ pub async fn callback_handler(bot: Bot, ctx: Context) -> Result<GroupIteration> 
     let vec_content = content.split(' ').collect::<Vec<&str>>();
 
     match vec_content.as_slice() {
+        ["osint", "ip", "cb_ip123", arg] => {
+            let _ = cb_ip123(arg, bot, chat_id).await;
+        }
         ["osint", "dns", "cb_dnsrecon", arg] => {
             let _ = cb_dnsrecon(arg, bot, chat_id).await;
         }
         ["osint", "dns", "cb_dnsenum", arg] => {
             let _ = cb_dnsenum(arg, bot, chat_id).await;
         }
-        ["AI总结","PROMPT_SHELL_OUTPUT"] => {
+        ["AI分析","PROMPT_SHELL_OUTPUT"] => {
             let res = ai_q_s(format!("{}:\n{}",PROMPT_SHELL_OUTPUT,raw_content)).await.unwrap();
             let _ = bot
                 .send_message(chat_id, res)
@@ -36,7 +39,7 @@ pub async fn callback_handler(bot: Bot, ctx: Context) -> Result<GroupIteration> 
                 .send()
                 .await;
         }
-        ["AI总结",prompt] => {
+        ["AI分析",prompt] => {
             let res = ai_q_s(format!("{}:\n{}",prompt,raw_content)).await.unwrap();
             let _ = bot
                 .send_message(chat_id, res)

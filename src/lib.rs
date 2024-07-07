@@ -4,6 +4,7 @@ use std::{
 };
 
 use once_cell::sync::Lazy;
+use reqwest::ClientBuilder;
 use serde::Deserialize;
 pub mod util;
 // 获取配置文件信息
@@ -14,8 +15,30 @@ pub static GLOBAL_CONFIG: Lazy<Arc<Config>> = Lazy::new(|| {
     Arc::new(config)
 });
 
+pub static REQWEST_CLIENT: Lazy<reqwest::Client> = Lazy::new(|| {
+    let mut req_builder = ClientBuilder::new();
+
+    if !GLOBAL_CONFIG.reqwest.user_agent.is_empty() {
+        req_builder = req_builder.user_agent(GLOBAL_CONFIG.reqwest.user_agent.clone());
+    }
+
+    if !GLOBAL_CONFIG.reqwest.proxy.is_empty() {
+        req_builder =
+            req_builder.proxy(reqwest::Proxy::all(GLOBAL_CONFIG.reqwest.proxy.clone()).unwrap())
+    }
+
+    match req_builder.build() {
+        Ok(client) => client,
+        Err(e) => {
+            // 处理客户端创建错误的情况，例如记录错误日志并采取适当的措施
+            eprintln!("Error creating client: {}", e);
+            panic!("Failed to create reqwest client");
+        }
+    }
+});
+
 // telegram单条消息长度不能超过4096个字符
-pub const MESSAGE_LEN:usize = 4000;
+pub const MESSAGE_LEN: usize = 4000;
 
 // 反序列化配置信息
 #[derive(Deserialize, Debug, Clone)]
@@ -23,6 +46,7 @@ pub struct Config {
     pub telegram: Telegram, // TG相关配置信息
     pub openai: Chatgpt,    // AI相关配置信息
     pub command: Command,   // 常用命令定制配置信息
+    pub reqwest: Reqwest,
     pub brute_force: BruteForce,
     pub yt_dlp: YtDlp,
     pub y_ytdl: YYtdl,
@@ -48,6 +72,12 @@ pub struct Command {
 }
 
 #[derive(Deserialize, Debug, Clone)]
+pub struct Reqwest {
+    pub user_agent: String,
+    pub proxy: String,
+}
+
+#[derive(Deserialize, Debug, Clone)]
 pub struct BruteForce {
     pub ssh: HashMap<String, String>,
 }
@@ -61,6 +91,7 @@ pub struct YtDlp {
 #[derive(Deserialize, Debug, Clone)]
 pub struct YYtdl {
     pub proxy: String,
+    pub hight_audio_save: bool,
 }
 
 #[derive(Deserialize, Debug, Clone)]

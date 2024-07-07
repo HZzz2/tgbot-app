@@ -12,7 +12,7 @@ pub async fn ls(bot: Bot, ctx: Context) -> Result<GroupIteration> {
         return Ok(GroupIteration::EndGroups);
     }
 
-    let output = Command::new("/usr/bin/ls")
+    let output = Command::new("ls")
         .args(["-l", "-a", "-h"])
         .output()
         .await

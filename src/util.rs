@@ -66,7 +66,7 @@ pub async fn ai_q_s<T: Into<String>>(content: T) -> anyhow::Result<String> {
     let response_body = res.json::<serde_json::Value>().await.unwrap();
     let rep = response_body["choices"][0]["message"]["content"]
         .as_str()
-        .unwrap();
+        .unwrap().trim_start_matches('"').trim_end_matches('"');
 
     // let _ = bot.send_message(chat_id, rep.to_string()).parse_mode("markdown".to_string()).send().await.unwrap();
     Ok(rep.to_string())

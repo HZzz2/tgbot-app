@@ -77,7 +77,7 @@ pub async fn cb_dnsenum(arg: &str, bot: Bot, chat_id: i64) -> Result<GroupIterat
         let _ = chunks_msg(&bot, chat_id, String::from_utf8_lossy(&dnsenum_output)).await;
         return Ok(GroupIteration::EndGroups)
     }
-    let button_ai = InlineKeyboardButton::callback_button("AI总结", "AI总结 PROMPT_SHELL_OUTPUT");
+    let button_ai = InlineKeyboardButton::callback_button("AI分析", "AI分析 PROMPT_SHELL_OUTPUT");
 
     bot.send_message(
         chat_id,
@@ -104,7 +104,7 @@ pub async fn cb_dnsrecon(arg: &str, bot: Bot, chat_id: i64) -> Result<GroupItera
         return Ok(GroupIteration::EndGroups);
     }
 
-    let button_ai: InlineKeyboardButton = InlineKeyboardButton::callback_button("AI总结", "AI总结 PROMPT_SHELL_OUTPUT");
+    let button_ai: InlineKeyboardButton = InlineKeyboardButton::callback_button("AI分析", "AI分析 PROMPT_SHELL_OUTPUT");
 
     bot.send_message(
         chat_id,

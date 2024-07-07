@@ -178,6 +178,10 @@ async fn main() -> Result<(), anyhow::Error> {
     let mut updater = Updater::new(&bot, dispatcher);
 
     // This method will start long polling through the getUpdates method
-    let _ = updater.start_polling(true).await;
+    // let _ = updater.start_polling(true).await;
+    match updater.start_polling(true).await{
+        Ok(_)=>{println!("bot启动成功");},
+        Err(e)=>{eprintln!("bot启动失败:{:?}",e);}
+    }
     Ok(())
 }
