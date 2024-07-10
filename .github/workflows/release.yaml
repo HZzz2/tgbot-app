@@ -1,186 +1,22 @@
 on:
-  # Indicates I want to run this workflow on all branches, PR, and tags
-  push:
-    branches: [ "main" ]
-    tags: [ "*" ]
+  release:
+    types: [created]
   pull_request:
     branches: [ "main" ]
 
-env:
-  RUST_VERSION: 1.78.0
-  BIN_NAME: "tgbot-app"
-
 jobs:
-  build:
-    name: Build - ${{ matrix.platform.name }}
-    # By default, runs on Ubuntu, otherwise, override with the desired os
-    runs-on: ${{ matrix.platform.os || 'ubuntu-22.04' }}
-    strategy:
-      matrix:
-        # Set platforms you want to build your binaries on
-        platform:
-          # Linux
-          - name: Linux x86_64
-            target: x86_64-unknown-linux-musl
-            build-args: "--release"
-
-          - name: Linux x86
-            target: i686-unknown-linux-musl
-            build-args: "--release"
-
-          - name: Linux aarch64
-            target: aarch64-unknown-linux-musl
-            build-args: "--release"
-
-          - name: Linux armv7hf
-            target: armv7-unknown-linux-musleabihf
-            build-args: "--release"
-
-          - name: Freebsd x86_64
-            target: x86_64-unknown-freebsd
-            build-args: "--release"
-
-          - name: Freebsd x86
-            target: i686-unknown-freebsd
-            build-args: "--release"
-
-          - name: Android aarch64
-            target: aarch64-linux-android
-            build-args: "--release"
-
-          - name: Android armv7
-            target: armv7-linux-androideabi
-            build-args: "--release"
-
-          # - name: Linux mips
-          #   target: mips-unknown-linux-musl
-          #   build-args: "--release"
-
-          # - name: Linux mips64
-          #   target: mips64-unknown-linux-muslabi64
-          #   build-args: "--release"
-
-          # Mac OS
-          - name: MacOS x86_64
-            os: macos-latest
-            target: x86_64-apple-darwin
-            build-args: "--release"
-
-          - name: MacOS aarch64
-            os: macos-latest
-            target: aarch64-apple-darwin
-            build-args: "--release"
-
-          # - name: iOS x86_64
-          #   target: x86_64-apple-ios
-
-
-          #- name: iOS aarch64
-          #  target: aarch64-apple-ios
-
-
-          # Windows
-          # - name: Windows x86_64
-          #   os: windows-latest
-          #   target: x86_64-pc-windows-msvc
-          #   build-args: "--profile release-with-symbols"
-
-          # - name: Windows x86
-          #   os: windows-latest
-          #   target: i686-pc-windows-msvc
-          #   build-args: "--profile release-with-symbols"
-
-    steps:
-      - name: Install package for linux
-        if: contains(matrix.platform.target, 'linux')
-        run: sudo apt install musl-tools
-
-      - name: Install package for Android
-        if: contains(matrix.platform.target, 'android')
-        run: sudo apt install android-libunwind android-libunwind-dev  libunwind-dev
-
-      - name: Set up JDK 17
-        if: contains(matrix.platform.target, 'android')
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Setup Android SDK
-        if: contains(matrix.platform.target, 'android')
-        uses: android-actions/setup-android@v3
-
-      - name: Checkout Git repo
-        uses: actions/checkout@v3
-
-      # Linux & Windows
-      - name: Install rust toolchain for Linux
-        uses: actions-rs/toolchain@v1
-        with:
-          # We setup Rust toolchain and the desired target
-          profile: minimal
-          toolchain: "${{ env.RUST_VERSION }}"
-          override: true
-          target: ${{ matrix.platform.target }}
-          components: rustfmt, clippy
-
-      - name: Install package for Android
-        if: contains(matrix.platform.target, 'android')
-        run: cargo install cross --git https://github.com/cross-rs/cross
-
-      - name: Set OpenSSL directory
-        if: matrix.platform.name == 'Linux x86_64'
-        run: echo 'export OPENSSL_DIR=/usr/local/opt/openssl@1.1' >> $GITHUB_ENV
-
-      - name: Show command used for Cargo
-        run: |
-          echo "cargo command is: ${{ env.CARGO }}"
-          echo "target flag is: ${{ env.BUILD_ARGS }}"
-
-      - name: Build ${{ matrix.platform.name }} binary
-        uses: actions-rs/cargo@v1
-        # We use cross-rs if not running on x86_64 architecture on Linux
-        with:
-          command: build
-          use-cross: ${{ !contains(matrix.platform.target, 'x86_64') || contains(matrix.platform.target, 'freebsd') }}
-          args: ${{ matrix.platform.build-args }} --target ${{ matrix.platform.target }}
-
-      - name: Store artifact
-        uses: actions/upload-artifact@v3
-        with:
-          # Finally, we store the binary as GitHub artifact for later usage
-          name: ${{ env.BIN_NAME }}-${{ matrix.platform.target }}
-          path: target/${{ matrix.platform.target }}/release${{ contains(matrix.platform.target, 'windows') && '-with-symbols' || '' }}/${{ env.BIN_NAME }}${{ contains(matrix.platform.target, 'windows') && '.exe' || '' }}
-          retention-days: 1
-
   release:
-    name: Release
-    needs: [ build ]
-    # We run the release job only if a tag starts with 'v' letter
-    if: startsWith( github.ref, 'refs/tags/v' )
-    runs-on: ubuntu-22.04
+    name: release ${{ matrix.target }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [x86_64-pc-windows-gnu, x86_64-unknown-linux-musl, x86_64-unknown-freebsd, i686-unknown-freebsd]
     steps:
-      - name: Checkout Git repo
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      # Download all artifacts
-      - uses: actions/download-artifact@v3
-        with:
-          path: artifacts
-
-      - name: list artifacts
-        run: find artifacts/
-
-      - name: Set up Go
-        uses: actions/setup-go@v4
-
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v5
-        with:
-          distribution: goreleaser
-          version: latest
-          args: release --clean --skip=validate
+      - uses: actions/checkout@master
+      - name: Compile and release
+        uses: rust-build/rust-build.action@v1.4.5
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          RUSTTARGET: ${{ matrix.target }}
