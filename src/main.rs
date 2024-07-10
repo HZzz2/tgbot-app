@@ -164,9 +164,10 @@ async fn main() -> Result<(), anyhow::Error> {
     dispatcher.add_handler_to_group(
         MessageHandler::new(
             handler,
+            message::All::filter()   //接收图片和文件以供查杀检验or?
             // This will restrict our echo function to the messages which
             // contain either text or a caption.
-            message::Text::filter().or(message::Caption::filter()),
+            // message::Text::filter().or(message::Caption::filter()),
         ),
         1,
     );

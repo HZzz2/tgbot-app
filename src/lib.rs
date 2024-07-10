@@ -19,12 +19,12 @@ pub static REQWEST_CLIENT: Lazy<reqwest::Client> = Lazy::new(|| {
     let mut req_builder = ClientBuilder::new();
 
     if !GLOBAL_CONFIG.reqwest.user_agent.is_empty() {
-        req_builder = req_builder.user_agent(GLOBAL_CONFIG.reqwest.user_agent.clone());
+        req_builder = req_builder.user_agent(&GLOBAL_CONFIG.reqwest.user_agent);
     }
 
     if !GLOBAL_CONFIG.reqwest.proxy.is_empty() {
         req_builder =
-            req_builder.proxy(reqwest::Proxy::all(GLOBAL_CONFIG.reqwest.proxy.clone()).unwrap())
+            req_builder.proxy(reqwest::Proxy::all(&GLOBAL_CONFIG.reqwest.proxy).unwrap())
     }
 
     match req_builder.build() {

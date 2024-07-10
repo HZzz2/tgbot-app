@@ -148,7 +148,7 @@ async fn down_mp3(url: &String, video_quality: VideoQuality) -> Result<PathBuf> 
             ..Default::default()
         }
     } else {
-        let proxy = GLOBAL_CONFIG.y_ytdl.proxy.clone();
+        let proxy = &GLOBAL_CONFIG.y_ytdl.proxy;
         if proxy.starts_with("socks5") && proxy.as_str().contains('@') {
             let err_msg = r#"
             reqwest库不支持带身份验证的socks5，请换成http/https (如果支持了请提交issuse告知我)
@@ -199,13 +199,18 @@ async fn down_mp3(url: &String, video_quality: VideoQuality) -> Result<PathBuf> 
 }
 
 async fn read_audio(pf: PathBuf) -> (String, Vec<u8>) {
-    let mut file = File::open(&pf).await.unwrap();
+    let file = File::open(&pf).await.unwrap();
     let metadata = file.metadata().await.unwrap();
     let file_size = metadata.len() as usize;
     // 创建一个足够大的 buffer
     let mut buffer = Vec::with_capacity(file_size);
     // 读取整个文件内容
-    file.read_to_end(&mut buffer).await.unwrap();
+    // file.read_to_end(&mut buffer).await.unwrap();
+    let mut reader = tokio::io::BufReader::new(file);
+    reader.read_to_end(&mut buffer).await.unwrap();
     // 文件名，文件内容
-    (pf.clone().to_str().unwrap().to_string(), buffer)
+    (
+        pf.file_name().unwrap().to_str().unwrap().to_string(),
+        buffer,
+    )
 }

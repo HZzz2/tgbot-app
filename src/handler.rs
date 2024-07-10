@@ -37,6 +37,12 @@ pub async fn handler(bot: Bot, ctx: Context) -> Result<GroupIteration> {
 
     //todo!  ip? domain?
 
+
+    //TODO 接收图片  。。。
+
+    //TODO 接收文件 发送云沙箱
+
+
     //todo! 默认为AI问答
     let _ = chatgpt(bot, ctx).await;
 
