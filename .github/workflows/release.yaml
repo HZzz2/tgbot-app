@@ -128,6 +128,10 @@ jobs:
         if: contains(matrix.platform.target, 'android')
         run: cargo install cross --git https://github.com/cross-rs/cross
 
+      - name: Set OpenSSL directory
+        if: matrix.platform.name == 'Linux x86_64'
+        run: echo 'export OPENSSL_DIR=/usr/local/opt/openssl@1.1' >> $GITHUB_ENV
+
       - name: Show command used for Cargo
         run: |
           echo "cargo command is: ${{ env.CARGO }}"
