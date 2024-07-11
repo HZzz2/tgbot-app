@@ -1,6 +1,6 @@
 [package]
 name = "tgbot-app"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2021"
 authors = ["HZzz2", "Leslie"]
 # default-run = "tgbot-app"
@@ -14,9 +14,9 @@ reqwest = { version = "0.12.5", features = ["json","socks"] }
 serde = { version = "1.0.203", features = ["derive"] }
 tokio = { version = "1.38.0", features = ["full"] }
 toml = "0.8.12"
-rusty_ytdl = "0.7.2"
+rusty_ytdl = "0.7.3"
 async-ssh2-tokio = "0.8.10"
 async-channel = "2.3.1"
 # anyhow = "1.0.86"
 anyhow = { version = "1.0", default-features = false }
-resend-rs = "0.7.0"
+resend-rs = "0.8.0"
