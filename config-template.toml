@@ -11,10 +11,19 @@ base_url = "https://api.openai.com/v1/chat/completions" # 请求地址 可更改
 model = "gpt-3.5-turbo"                                 # 模型名,可更改"gpt-4"等受支持模型
 api_key = "sk-kx****57c71"                              # API KEY
 
-[command] # 定制常用的命令,使用方式：/c 1 ，输入不存在的key则显示所有已定制的命令,如/c 999
-cmd = { "1" = "curl ipinfo.io", "2" = "df -h", "3" = "curl ip.fm", "4" = "curl wttr.in/Hunan", "唱" = "id", "跳" = "curl https://uapis.cn/api/say", "rap" = "curl https://uapis.cn/api/prohibited?text=鸡你太美", "查看所在目录" = "pwd" }
+[command] # 定制常用的命令,使用方式：/c 1 或 /c 跳，输入不存在的key则显示所有已定制的命令,如/c 999
+cmd = [
+    {"1" = "curl ipinfo.io"},
+    {"2" = "df -h"},
+    {"3" = "curl ip.fm"},
+    {"4" = "curl wttr.in/Hunan"},
+    {"唱" = "id"},
+    {"跳" = "curl https://uapis.cn/api/say"},
+    {"rap" = "curl https://uapis.cn/api/prohibited?text=鸡你太美"},
+    { "查看当前所在目录" = "pwd"}
+]
 
-[reqwest]   #机器人在使用reqwest发送网络请求时附带的参数   部分网站请求检查UA
+[reqwest]   #机器人在使用reqwest库发送网络请求时附带的参数   部分网站会检查UA
 user_agent = "tgbot-app"
 #user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0"
 proxy = ""

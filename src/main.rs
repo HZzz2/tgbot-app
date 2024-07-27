@@ -34,6 +34,9 @@ pub use server::resend;
 pub mod osint;
 pub use osint::{dns, ip};
 
+pub mod brute_force;
+pub use brute_force::ssh_brute;
+
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
     // 获取配置文件信息
@@ -129,6 +132,12 @@ async fn main() -> Result<(), anyhow::Error> {
     botcommadns.push(BotCommand {
         command: "dns".to_string(),
         description: "获取DNS相关信息".to_string(),
+    });
+
+    dispatcher.add_handler(CommandHandler::new("ssh_brute", ssh_brute));
+    botcommadns.push(BotCommand {
+        command: "ssh_brute".to_string(),
+        description: "ssh爆破".to_string(),
     });
 
     // ai

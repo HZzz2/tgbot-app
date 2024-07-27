@@ -9,4 +9,4 @@ sudo systemctl stop tgbot-app
 
 # 命令行运行项目
 echo "当前命令行下运行tgbot-app"
-cargo run --release
+cargo run

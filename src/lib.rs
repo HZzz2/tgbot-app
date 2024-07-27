@@ -1,5 +1,5 @@
 use std::{
-    collections::{BTreeMap, HashMap, HashSet},
+    collections::{HashMap, HashSet},
     sync::Arc,
 };
 
@@ -68,7 +68,8 @@ pub struct Chatgpt {
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct Command {
-    pub cmd: BTreeMap<String, String>,
+    // pub cmd: BTreeMap<String, String>,
+    pub cmd: Vec<HashMap<String,String>>
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -99,3 +100,12 @@ pub struct ReSend {
     pub api_key: String,
     pub from: String,
 }
+
+
+// macro_rules! verify_telegram_id {
+//     ($chat_id:expr) => {
+//         if!verify_telegram($chat_id) {
+//             return Ok(GroupIteration::EndGroups);
+//         }
+//     };
+// }
