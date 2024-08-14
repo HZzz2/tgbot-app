@@ -6,17 +6,20 @@
 bot_token = "6763******uQ" #telegram bot token
 ids = [6111119, 6222228]       # telegram user id   可使用此bot的id，可多个
 
-[openai]
+[openai]  #兼容openai chatgpt请求格式的模型api调用应该都可以正常使用
 base_url = "https://api.openai.com/v1/chat/completions" # 请求地址 可更改
 model = "gpt-3.5-turbo"                                 # 模型名,可更改"gpt-4"等受支持模型
 api_key = "sk-kx****57c71"                              # API KEY
 
-[command] # 定制常用的命令,使用方式：/c 1 或 /c 跳，输入不存在的key则显示所有已定制的命令,如/c 999
+[command] # 定制常用的命令,使用方式：`/c 1` 或 `/c 跳`，输入不存在的key则显示所有已定制的命令,如/c 999
 cmd = [
     {"1" = "curl ipinfo.io"},
     {"2" = "df -h"},
     {"3" = "curl ip.fm"},
     {"4" = "curl wttr.in/Hunan"},
+    # 在rusty_ytdl无法使用可使用yt-dlp下载音频，然后使用tdl上传音频，使用tdl登录tg后指定要发送的群组ID
+    # 将tdl_dir目录下的文件上传到群组后删除文件(--rm)，想保留文件不想删除文件则去掉--rm
+    {"c" = "tdl up -p /root/tgbot-app/tdl_dir -c 填群组ID --rm -t 8 -s 524288 -l 4"}, 
     {"唱" = "id"},
     {"跳" = "curl https://uapis.cn/api/say"},
     {"rap" = "curl https://uapis.cn/api/prohibited?text=鸡你太美"},

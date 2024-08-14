@@ -198,7 +198,9 @@ async fn down_mp3(url: &String, video_quality: VideoQuality) -> Result<PathBuf> 
         _ => format!("./{title}.mp3"),
     };
     let file = std::path::PathBuf::from(&file_name);
+    dbg!("下载前");
     audio.download(&file).await?;
+    dbg!("下载后");
     Ok(file)
 }
 
