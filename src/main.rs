@@ -20,7 +20,7 @@ mod callback_handler;
 use callback_handler::callback_handler;
 
 mod shell;
-use shell::{c, ls, ping, shell};
+use shell::{c, ls, ping, shell, shell_no_output};
 mod ai;
 use ai::chatgpt;
 
@@ -118,7 +118,12 @@ async fn main() -> Result<(), anyhow::Error> {
     dispatcher.add_handler(CommandHandler::new("shell", shell));
     botcommadns.push(BotCommand {
         command: "shell".to_string(),
-        description: "执行任意shell命令".to_string(),
+        description: "执行任意shell命令,并显示结果".to_string(),
+    });
+    dispatcher.add_handler(CommandHandler::new("shell_no_output", shell_no_output));
+    botcommadns.push(BotCommand {
+        command: "shell_no_output".to_string(),
+        description: "执行任意shell命令,不输出内容，只输出是否执行成功".to_string(),
     });
 
     // osint

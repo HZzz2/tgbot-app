@@ -94,7 +94,7 @@ chmod +x yt-dlp
         }
     };
 
-    bot.send_message(chat_id, result).send().await?;
+    bot.send_message(chat_id, result).disable_notification(true).send().await?;
     bot.delete_message(chat_id, msg.message_id).send().await?;
     // 修改消息不会修改消息时间，不能知晓下载所花费的时间
     // bot.edit_message_text(result).chat_id(chat_id).message_id(msg.message_id).send().await?;
