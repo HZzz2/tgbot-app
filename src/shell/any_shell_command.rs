@@ -1,9 +1,9 @@
+use ferrisgram::error::Result;
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
+use std::process::Stdio;
+use std::time::Instant;
 use tgbot_app::util::{chunks_msg, send_err_msg, verify_telegram};
 use tokio::process::Command;
-use ferrisgram::error::Result;
-use std::time::Instant;
-use std::process::Stdio;
 
 pub async fn shell(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     let msg = ctx.effective_message.unwrap();
@@ -11,11 +11,13 @@ pub async fn shell(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     if !verify_telegram(chat_id) {
         return Ok(GroupIteration::EndGroups);
     }
-    
+
     let cm = msg.text.unwrap();
     let cm = &cm[7..].trim(); // 去掉 "/shell " 前缀
 
-    bot.send_message(chat_id, format!("收到命令: {}", cm)).send().await?;
+    bot.send_message(chat_id, format!("收到命令: {}", cm))
+        .send()
+        .await?;
 
     if cm.is_empty() {
         send_err_msg(bot, chat_id, "命令为空".to_string()).await;
@@ -32,10 +34,18 @@ pub async fn shell(bot: Bot, ctx: Context) -> Result<GroupIteration> {
         .output()
         .await;
 
-    let duration = start_time.elapsed();
+    let elapsed_secs = start_time.elapsed().as_secs();
+    let time_format = if elapsed_secs > 60 {
+        let minutes = elapsed_secs / 60;
+        let seconds = elapsed_secs % 60;
+        format!("{} 分 {} 秒", minutes, seconds)
+    } else {
+        format!("{} 秒", elapsed_secs)
+    };
 
-    bot.send_message(chat_id, format!("命令执行完成，耗时: {:?}", duration)).send().await?;
-
+    // bot.send_message(chat_id, format!("命令耗时: {:?}", time_format))
+    //     .send()
+    //     .await?;
     match output {
         Ok(output) => {
             let stdout = String::from_utf8_lossy(&output.stdout);
@@ -49,7 +59,13 @@ pub async fn shell(bot: Bot, ctx: Context) -> Result<GroupIteration> {
                 命令: {}\n\n\
                 标准输出 (长度 {} 字节):\n{}\n\n\
                 错误输出 (长度 {} 字节):\n{}",
-                status, duration, cm, stdout.len(), stdout, stderr.len(), stderr
+                status,
+                time_format,
+                cm,
+                stdout.len(),
+                stdout,
+                stderr.len(),
+                stderr
             );
 
             // 分段发送消息

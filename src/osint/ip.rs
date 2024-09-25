@@ -63,6 +63,7 @@ pub async fn ip(bot: Bot, ctx: Context) -> Result<GroupIteration> {
 
     let jdata = serde_json::to_string_pretty(&ip_json_data).unwrap();
 
+    // 回调和web访问
     let button_ping0 = InlineKeyboardButton::url_button(
         "ping0-web",
         format!("https://ip.ping0.cc/ip/{}", ip).as_str(),
@@ -76,6 +77,7 @@ pub async fn ip(bot: Bot, ctx: Context) -> Result<GroupIteration> {
         format!("osint ip cb_ip123 {}", ip).as_str(),
     );
 
+    // 发送IP信息并提供回调和web访问
     bot.send_message(chat_id, format!("ip数据-json格式：{}", jdata.clone()))
         .reply_markup(InlineKeyboardMarkup::new(vec![vec![
             button_ip123,
@@ -86,6 +88,7 @@ pub async fn ip(bot: Bot, ctx: Context) -> Result<GroupIteration> {
         // .parse_mode("markdown".to_string())
         .send()
         .await?;
+    // 发送地理位置
     if let Some(loc_str) = ip_json_data["data"]["loc"].as_str() {
         let loc: Vec<f64> = loc_str
             .split(',')
@@ -109,6 +112,7 @@ pub async fn ip(bot: Bot, ctx: Context) -> Result<GroupIteration> {
             .unwrap();
         }
     };
+    // AI分析json数据并总结
     let ai_result = ai_q_s(format!("{}：{}", PROMPT_IP_JSON, jdata)).await;
     if let Ok(ai_answer) = ai_result {
         let _ = bot

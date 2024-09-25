@@ -34,11 +34,18 @@ pub async fn shell_no_output(bot: Bot, ctx: Context) -> Result<GroupIteration> {
         .output()
         .await;
 
-    let duration = start_time.elapsed();
+    let elapsed_secs = start_time.elapsed().as_secs();
+    let time_format = if elapsed_secs > 60 {
+        let minutes = elapsed_secs / 60;
+        let seconds = elapsed_secs % 60;
+        format!("{} 分 {} 秒", minutes, seconds)
+    } else {
+        format!("{} 秒", elapsed_secs)
+    };
 
-    bot.send_message(chat_id, format!("命令耗时: {:?}", duration))
-        .send()
-        .await?;
+    // bot.send_message(chat_id, format!("命令耗时: {:?}", time_format))
+    //     .send()
+    //     .await?;
 
     match output {
         Ok(output) => {
@@ -61,15 +68,20 @@ pub async fn shell_no_output(bot: Bot, ctx: Context) -> Result<GroupIteration> {
 
             let status = output.status;
             if status.success() {
-                bot.send_message(chat_id, format!("执行命令成功！命令：{}",cm))
+                bot.send_message(chat_id, format!("执行命令成功！耗时：{}\t命令：{}", time_format, cm))
                     .send()
                     .await?;
             } else {
-                send_err_msg(bot, chat_id, format!("命令执行失败，命令：{}", cm)).await;
+                send_err_msg(bot, chat_id, format!("命令执行失败，耗时：{}\t命令：{}", time_format, cm)).await;
             }
         }
         Err(e) => {
-            send_err_msg(bot, chat_id, format!("命令执行失败: {:?}\t失败的命令：{}", e,cm)).await;
+            send_err_msg(
+                bot,
+                chat_id,
+                format!("命令执行失败: {:?}\t失败的命令：{}", e, cm),
+            )
+            .await;
         }
     }
 

@@ -19,6 +19,9 @@ pub async fn dns(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     } else {
         cm[..].trim()
     };
+
+    // 回调  web待加
+    // todo
     let button_dnsrecon = InlineKeyboardButton::callback_button(
         "dnsrecon",
         format!("osint dns cb_dnsrecon {}", d).as_str(),
@@ -31,6 +34,7 @@ pub async fn dns(bot: Bot, ctx: Context) -> Result<GroupIteration> {
 
     // let button_baidu = InlineKeyboardButton::url_button("百度", "https://baidu.com");
 
+    // dig命令查询
     let dig_output = Command::new("dig")
         .arg(d)
         .output()
@@ -45,6 +49,7 @@ pub async fn dns(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     .send()
     .await?;
 
+    // nslookup查询
     let nslookup_output = Command::new("nslookup")
         .arg(d)
         .output()
@@ -52,6 +57,7 @@ pub async fn dns(bot: Bot, ctx: Context) -> Result<GroupIteration> {
         .expect("nslookup命令执行失败")
         .stdout;
 
+    // nslookup查询结果后提供回调和web todo
     bot.send_message(
         chat_id,
         format!("nslookup:{}", String::from_utf8_lossy(&nslookup_output)),
