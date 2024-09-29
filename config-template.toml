@@ -3,8 +3,8 @@
 ### 为了调用本地系统资源或程序，推荐使用系统服务的方式启动而不是docker启动
 
 [telegram]
-bot_token = "6763******uQ" #telegram bot token
-ids = [6111119, 6222228]       # telegram user id   可使用此bot的id，可多个
+bot_token = "6763******uQ" #telegram bot token   通过BotFather申请获得：https://t.me/BotFather
+ids = [6111119, 6222228]       # telegram user id   可使用此bot的id，可多个 获取ID：https://t.me/get_id_bot
 
 [openai]  #兼容openai chatgpt请求格式的模型api调用应该都可以正常使用
 base_url = "https://api.openai.com/v1/chat/completions" # 请求地址 可更改

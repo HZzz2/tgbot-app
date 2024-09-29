@@ -31,9 +31,15 @@
 - 发送非命令消息默认与 AI 进行单次对话 💬 例如发送：`红烧鱼怎么做？` 🍲
 - 发送油管链接默认下载音频 🎵（工作目录下需要 [yt-dlp](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#release-files) ）
 
-## 📦 安装步骤
+## 📦 安装编译步骤（提供已编译好的Debian和FreeBSD版本）
 
 1. 确保您的系统中已安装Rust和Cargo。🦀
+   ```
+   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+   ```
+   ```
+   apt install pkg-config libssl-dev -y
+   ```
 2. 克隆此仓库：
    ```
    git clone https://github.com/HZzz2/tgbot-app
@@ -51,7 +57,7 @@
 
 1. 在项目根目录将`config-template.toml`更名为`config.toml`。📄
    ```
-   mv config-template.toml config.toml
+   cp config-template.toml config.toml
    ```
 
 2. 在`config.toml`文件中添加您的Telegram Bot Token和其他必要的配置。🔑
@@ -124,12 +130,17 @@
 
 ## 📊 日志和监控
 
+查看服务状态：
+```
+sudo systemctl status tgbot-app
+```
+
 查看服务日志：
 ```
 sudo journalctl -u tgbot-app
 ```
 
-使用常见的Linux监控工具（如top、htop等）来监控程序的资源使用情况。📈
+使用常见的Linux监控工具（如systemctl、top等）来监控程序的资源使用情况。📈
 
 ## 🤝 贡献
 
