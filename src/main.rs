@@ -49,13 +49,14 @@ async fn main() -> Result<(), anyhow::Error> {
         Err(error) => panic!("无法创建bot: {}", error),
     };
     let short_des = r#"
+Telegram Bot助手
 开源地址:https://github.com/HZzz2/tgbot-app
 "#
     .to_string();
     let des: String = r#"
 机器人开源地址： https://github.com/HZzz2/tgbot-app
 欢迎提交功能请求，优化建议, BUG，PR
-可通过机器人执行shell命令，信息手机，常用命令设置，发送邮件，下载音频或视频
+可通过机器人执行shell命令，信息搜集，常用命令执行，发送邮件，下载音频或视频等等
     "#
     .to_string();
     bot.set_my_description()
