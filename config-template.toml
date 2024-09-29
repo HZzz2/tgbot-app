@@ -46,7 +46,7 @@ proxy = "" # 为空则不使用代理，默认不使用代理 (由于某些IP会
 [y_ytdl] # 目前reqwest好像不支持带身份验证socks5。HTTP/HTTPS可选择带身份验证，推荐
 proxy = "" # 为空则不使用代理，默认不使用代理 (由于某些IP会被油管禁止(要求验证)，如果无法下载可以使用代理)
 #proxy = "http://username:password@1.2.3.4:1880"  # HTTP/HTTPS可选身份验证，暂不支持带有账号密码验证的socks5。 reqwest crate本人测试后发现无法使用带身份验证的socks5代理 如果要使用，socks5要没有身份验证的才行，不推荐,推荐HTTP
-high_audio_save = false   #在低品质音频发送失败时是否删除高音质音频，serv00建议开启:true
+hight_audio_save = false   #在低品质音频发送失败时是否删除高音质音频，serv00建议开启:true
 
 
 # 如需使用[resend](https://resend.com)需要添加api_key和发送邮箱地址(from)
