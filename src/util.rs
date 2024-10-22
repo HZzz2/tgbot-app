@@ -1,6 +1,7 @@
 use ferrisgram::Bot;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
+use tokio::process::Command;
 use std::fmt::Display;
 
 use crate::GLOBAL_CONFIG;
@@ -28,6 +29,19 @@ pub async fn chunks_msg<T: AsRef<str>>(bot: &Bot, chat_id: i64, message: T) {
         let chunk_str: String = chunk.iter().collect();
         let _ = bot.send_message(chat_id, chunk_str).send().await;
     }
+}
+
+// 执行单条shell命令单参数并返回输出
+pub async fn execute_one_shell(shell_cmd:String,arg:impl ToString) -> Result<String,String>{
+    let output = Command::new(&shell_cmd)
+        .arg(arg.to_string())
+        .output()
+        .await
+        .unwrap()
+        .stdout;
+
+    Ok(String::from_utf8_lossy(&output).to_string())
+   
 }
 
 #[derive(Serialize, Deserialize)]

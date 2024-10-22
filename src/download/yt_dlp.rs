@@ -17,25 +17,37 @@ pub async fn ytdlp(bot: Bot, ctx: Context) -> Result<GroupIteration> {
 
     let cookie = GLOBAL_CONFIG.yt_dlp.cookie.as_str();
     let proxy = GLOBAL_CONFIG.yt_dlp.proxy.as_str();
-    let com = match (cookie, proxy) {
-        (ck, px) if !ck.is_empty() && !px.is_empty() => {
-            format!(r#"./yt-dlp --cookies {} --proxy {} {}"#, ck, px, link)
-        }
-        (ck, _) if !ck.is_empty() => format!(r#"./yt-dlp --cookies {} {}"#, ck, link),
-        (_, px) if !px.is_empty() => format!(r#"./yt-dlp --proxy {} {}"#, px, link),
-        _ => format!(r#"./yt-dlp {}"#, link),
-    };
+    let args = GLOBAL_CONFIG.yt_dlp.args.as_str();
+
+    let mut com = Vec::new();
+    com.push("./yt-dlp");
+
+    if !cookie.is_empty() {
+        com.extend_from_slice(&["--cookies", cookie]);
+    }
+
+    if !proxy.is_empty() {
+        com.extend_from_slice(&["--proxy", proxy]);
+    }
+
+    if !args.is_empty() {
+        com.push(args);
+    }
+
+    com.push(link);
+    let command_string = com.join(" ");
+    let comm_string = command_string.clone();
 
     let task = tokio::task::spawn_blocking(move || {
         std::process::Command::new("sh")
             .arg("-c")
-            .arg(com)
+            .arg(command_string.clone())
             .output()
             .unwrap()
     });
 
     let msg = bot
-        .send_message(chat_id, "正在使用yt-dlp下载视频中···".to_string())
+        .send_message(chat_id, format!("正在使用yt-dlp下载视频中···{}",comm_string))
         .disable_notification(true)
         .send()
         .await

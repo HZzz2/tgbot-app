@@ -1,9 +1,17 @@
+use std::path::Path;
+
 use ferrisgram::error::Result;
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
-use tgbot_app::util::verify_telegram;
 
-use crate::download::ytdlp_audio;
+use tokio::fs::DirBuilder;
+use tokio::fs::File;
+use tokio::io::AsyncWriteExt;
+
 use crate::ai::chatgpt;
+use crate::download::ytdlp_audio;
+use tgbot_app::util::{execute_one_shell, verify_telegram};
+use tgbot_app::REQWEST_CLIENT;
+
 // use crate::yt_audio;
 // 消息处理函数
 pub async fn handler(bot: Bot, ctx: Context) -> Result<GroupIteration> {
@@ -11,11 +19,62 @@ pub async fn handler(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     // Hence we can unwrap effective chat without checking if it is none.
     // let chat = ctx.effective_chat.unwrap();
     // Same logic as chat applies on unwrapping effective message here.
+
     let msg = ctx.clone().effective_message.unwrap();
     let chat_id = msg.chat.id;
     if !verify_telegram(chat_id) {
         return Ok(GroupIteration::EndGroups);
     }
+
+    //TODO 接收图片  。。。
+    // 目前下载图片后对图片进行file和exiftool命令，发现telegram会对png图片转为jpg
+    // 接收图片
+    if let Some(mut photo) = ctx.clone().effective_message.unwrap().photo {
+        // println!("photo: {:?},len: {}", photo, photo.len());
+        // for p in photo {
+        //     // let file = File::create(p.file_unique_id).await?;
+        //     let p_file = bot.get_file(p.file_id).send().await?;
+        //     println!("p_file：{:?}", p_file);
+        // }
+        let p = photo.pop().unwrap();
+        let p_file = bot.get_file(p.file_id).send().await?;
+        let file_path = p_file.file_path.unwrap();
+        let path = Path::new(&file_path);
+        let dir = path.parent().unwrap();
+        let _file_name = path.file_name().unwrap();
+
+        let url = format!(
+            "https://api.telegram.org/file/bot{}/{}",
+            bot.token, file_path
+        );
+        // 发送 HTTP 请求
+        let response_bytes = REQWEST_CLIENT
+            .get(url)
+            .send()
+            .await
+            .unwrap()
+            .bytes()
+            .await
+            .unwrap();
+        // 创建本地文件
+        DirBuilder::new().recursive(true).create(dir).await.unwrap();
+        let mut output_file = File::create(path).await.unwrap();
+        // 写入磁盘
+        let _ = output_file.write_all(&response_bytes).await;
+
+        let file_output = execute_one_shell("file".to_string(), &file_path).await;
+        let exiftool_output = execute_one_shell("exiftool".to_string(), &file_path).await;
+
+        bot.send_message(chat_id, file_output?).send().await?;
+
+        if let Ok(exiftool_output) = exiftool_output {
+            bot.send_message(chat_id, exiftool_output).send().await?;
+        }
+        let _ = tokio::fs::remove_file(path).await;
+
+        return Ok(GroupIteration::EndGroups);
+    }
+
     let content = msg.text.unwrap();
     let content = content.trim();
 
@@ -44,11 +103,9 @@ pub async fn handler(bot: Bot, ctx: Context) -> Result<GroupIteration> {
 
     //todo!  ip? domain?
 
-    //TODO 接收图片  。。。
-
     //TODO 接收文件 发送云沙箱
 
-    //todo! 默认为AI问答
+    //默认为AI问答
     let _ = chatgpt(bot, ctx).await;
 
     // Every api method creates a builder which contains various parameters of that respective method.

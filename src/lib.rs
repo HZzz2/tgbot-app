@@ -87,6 +87,7 @@ pub struct BruteForce {
 pub struct YtDlp {
     pub cookie: String,
     pub proxy: String,
+    pub args: String
 }
 
 #[derive(Deserialize, Debug, Clone)]
