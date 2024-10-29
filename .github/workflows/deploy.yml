@@ -27,12 +27,6 @@ jobs:
             target: x86_64-apple-darwin
             binary-postfix: ""
             asset-name: darwin-amd64
-          # FreeBSD 支持
-          - os: ubuntu-latest
-            os-name: freebsd
-            target: x86_64-unknown-freebsd
-            binary-postfix: ""
-            asset-name: freebsd-amd64
 
     steps:
       - uses: actions/checkout@v4
@@ -42,35 +36,11 @@ jobs:
         with:
           targets: ${{ matrix.platform.target }}
 
-      # 为 FreeBSD 安装必要的依赖
-      - name: Install FreeBSD target dependencies
-        if: matrix.platform.os-name == 'freebsd'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-multilib pkg-config
-          rustup target add x86_64-unknown-freebsd
-
-      # 修改 Cargo.toml 添加 vendored 特性
-      - name: Configure OpenSSL vendored
-        if: matrix.platform.os-name == 'freebsd'
-        run: |
-          # 备份原始的 Cargo.toml
-          cp Cargo.toml Cargo.toml.backup
-          
-          # 添加 vendored 特性到 Cargo.toml
-          sed -i '$ a [dependencies.openssl-sys]' Cargo.toml
-          sed -i '$ a version = "0.9"' Cargo.toml
-          sed -i '$ a features = ["vendored"]' Cargo.toml
-
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
 
       - name: Build Binary
         run: cargo build --release --target ${{ matrix.platform.target }}
-
-      - name: Restore Cargo.toml
-        if: matrix.platform.os-name == 'freebsd'
-        run: mv Cargo.toml.backup Cargo.toml
 
       - name: Prepare Release Archive
         shell: bash
