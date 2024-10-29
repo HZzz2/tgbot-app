@@ -1,182 +1,75 @@
-name: Deploy
+name: Build and Release
 
 on:
   push:
     tags:
-      - "v*.*.*"
+      - 'v*'
 
 jobs:
-  publish-github:
-    name: Publish for ${{ matrix.build.OS }} (${{ matrix.build.TARGET }})
-    runs-on: ${{ matrix.build.OS }}
+  release:
+    name: Release - ${{ matrix.platform.os }}
+    runs-on: ${{ matrix.platform.os }}
     strategy:
-      fail-fast: false
       matrix:
-        build:
-          - {
-              OS: ubuntu-22.04,
-              TOOLCHAIN: stable,
-              TARGET: x86_64-unknown-linux-gnu,
-              ARGS: "",
-            }
-          - {
-              OS: ubuntu-22.04,
-              TOOLCHAIN: stable,
-              TARGET: x86_64-unknown-linux-musl,
-              ARGS: "",
-            }
-          - {
-              OS: ubuntu-22.04,
-              TOOLCHAIN: stable,
-              TARGET: aarch64-unknown-linux-gnu,
-              ARGS: "",
-            }
-          - {
-              OS: ubuntu-22.04,
-              TOOLCHAIN: stable,
-              TARGET: riscv64gc-unknown-linux-gnu,
-              ARGS: "",
-            }
-          - {
-              OS: ubuntu-22.04,
-              TOOLCHAIN: stable,
-              TARGET: i686-unknown-linux-gnu,
-              ARGS: "--no-default-features",
-            }
-          - {
-              OS: ubuntu-22.04,
-              TOOLCHAIN: stable,
-              TARGET: i686-unknown-linux-musl,
-              ARGS: "--no-default-features",
-            }
-          - {
-              OS: ubuntu-22.04,
-              TOOLCHAIN: stable,
-              TARGET: aarch64-unknown-linux-musl,
-              ARGS: "--no-default-features",
-            }
-          - {
-              OS: ubuntu-22.04,
-              TOOLCHAIN: stable,
-              TARGET: armv5te-unknown-linux-gnueabi,
-              ARGS: "--no-default-features",
-            }
-          - {
-              OS: ubuntu-22.04,
-              TOOLCHAIN: stable,
-              TARGET: armv7-unknown-linux-gnueabihf,
-              ARGS: "--no-default-features",
-            }
-          - {
-              OS: ubuntu-22.04,
-              TOOLCHAIN: stable,
-              TARGET: arm-unknown-linux-gnueabi,
-              ARGS: "--no-default-features",
-            }
-          - {
-              OS: ubuntu-22.04,
-              TOOLCHAIN: stable,
-              TARGET: arm-unknown-linux-gnueabihf,
-              ARGS: "--no-default-features",
-            }
-          - {
-              OS: ubuntu-22.04,
-              TOOLCHAIN: stable,
-              TARGET: powerpc64le-unknown-linux-gnu,
-              ARGS: "--no-default-features",
-            }
-          - {
-              OS: windows-2022,
-              TOOLCHAIN: stable,
-              TARGET: x86_64-pc-windows-msvc,
-              ARGS: "--no-default-features",
-            }
-          - {
-              OS: macos-14,
-              TOOLCHAIN: stable,
-              TARGET: x86_64-apple-darwin,
-              ARGS: "--no-default-features",
-            }
-          - {
-              OS: macos-14,
-              TOOLCHAIN: stable,
-              TARGET: aarch64-apple-darwin,
-              ARGS: "--no-default-features",
-            }
+        platform:
+          - os: ubuntu-latest
+            os-name: linux
+            target: x86_64-unknown-linux-gnu
+            binary-postfix: ""
+            asset-name: linux-amd64
+          - os: windows-latest
+            os-name: windows
+            target: x86_64-pc-windows-msvc
+            binary-postfix: ".exe"
+            asset-name: windows-amd64
+          - os: macos-latest
+            os-name: macos
+            target: x86_64-apple-darwin
+            binary-postfix: ""
+            asset-name: darwin-amd64
+
     steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set the release version
-        run: echo "RELEASE_VERSION=${GITHUB_REF:11}" >> $GITHUB_ENV
-
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: ${{ matrix.build.TOOLCHAIN }}
-          target: ${{ matrix.build.TARGET }}
-          override: true
+          targets: ${{ matrix.platform.target }}
 
-      - name: Cache Cargo dependencies
+      - name: Rust Cache
         uses: Swatinem/rust-cache@v2
 
-      - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          use-cross: ${{ matrix.build.OS != 'windows-2022' }}
-          command: build
-          args: --release --locked --target ${{ matrix.build.TARGET }} ${{ matrix.build.ARGS }}
+      - name: Build Binary
+        run: cargo build --release --target ${{ matrix.platform.target }}
 
-      - name: Prepare release assets
+      - name: Prepare Release Archive
         shell: bash
         run: |
-          mkdir -p release
-          cp {LICENSE-MIT,LICENSE-APACHE,README.md,CHANGELOG.md} release/
-          if [ "${{ matrix.build.OS }}" = "windows-2022" ]; then
-            cp target/${{ matrix.build.TARGET }}/release/tgbot-app.exe release/
+          # 从 Cargo.toml 读取二进制名称（假设与包名相同）
+          BINARY_NAME=$(grep -m1 '^name = ' Cargo.toml | cut -d '"' -f2)
+          
+          # 创建发布目录
+          mkdir release
+          
+          # 复制二进制文件并重命名
+          cp target/${{ matrix.platform.target }}/release/$BINARY_NAME${{ matrix.platform.binary-postfix }} release/
+          
+          # 复制README和LICENSE等文件（如果存在）
+          cp README.md release/ 2>/dev/null || true
+          cp LICENSE release/ 2>/dev/null || true
+          
+          # 创建压缩包
+          cd release
+          if [[ "${{ matrix.platform.os }}" == "windows-latest" ]]; then
+            7z a -tzip "../$BINARY_NAME-${{ matrix.platform.asset-name }}.zip" *
           else
-            cp target/${{ matrix.build.TARGET }}/release/tgbot-app release/
-          fi
-          mv release/ tgbot-app-${{env.RELEASE_VERSION}}/
-
-      - name: Create release artifacts
-        shell: bash
-        run: |
-          if [ "${{ matrix.build.OS }}" = "windows-2022" ]; then
-            7z a -tzip "tgbot-app-${{ env.RELEASE_VERSION }}-${{ matrix.build.TARGET }}.zip" \
-              tgbot-app-${{ env.RELEASE_VERSION }}/
-          else
-            tar -czvf tgbot-app-${{ env.RELEASE_VERSION }}-${{ matrix.build.TARGET }}.tar.gz \
-              tgbot-app-${{ env.RELEASE_VERSION }}/
-            shasum -a 512 tgbot-app-${{ env.RELEASE_VERSION }}-${{ matrix.build.TARGET }}.tar.gz \
-              > tgbot-app-${{ env.RELEASE_VERSION }}-${{ matrix.build.TARGET }}.tar.gz.sha512
+            tar czf "../$BINARY_NAME-${{ matrix.platform.asset-name }}.tar.gz" *
           fi
 
-      - name: Sign the release
-        if: matrix.build.OS != 'windows-2022'
-        run: |
-          echo "${{ secrets.GPG_RELEASE_KEY }}" | base64 --decode > private.key
-          echo "${{ secrets.GPG_PASSPHRASE }}" | gpg --pinentry-mode=loopback \
-            --passphrase-fd 0 --import private.key
-          echo "${{secrets.GPG_PASSPHRASE}}" | gpg --pinentry-mode=loopback \
-            --passphrase-fd 0 --detach-sign \
-            tgbot-app-${{ env.RELEASE_VERSION }}-${{ matrix.build.TARGET }}.tar.gz
-
-      - name: Generate a changelog
-        uses: orhun/git-cliff-action@v4
-        id: git-cliff
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v1
         with:
-          args: --latest --github-repo ${{ github.repository }}
+          files: |
+            ${{ github.event.repository.name }}-${{ matrix.platform.asset-name }}.*
         env:
-          OUTPUT: CHANGES.md
-
-      - name: Upload the binary releases
-        uses: svenstaro/upload-release-action@v2
-        with:
-          file: tgbot-app-${{ env.RELEASE_VERSION }}-${{ matrix.build.TARGET }}*
-          file_glob: true
-          overwrite: true
-          tag: ${{ github.ref }}
-          release_name: "Release v${{ env.RELEASE_VERSION }}"
-          body: ${{ steps.git-cliff.outputs.content }}
-          repo_token: ${{ secrets.RELEASE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
