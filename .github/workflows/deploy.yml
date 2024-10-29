@@ -27,6 +27,12 @@ jobs:
             target: x86_64-apple-darwin
             binary-postfix: ""
             asset-name: darwin-amd64
+          # 添加 FreeBSD 支持
+          - os: ubuntu-latest  # 我们在 Ubuntu 上使用交叉编译
+            os-name: freebsd
+            target: x86_64-unknown-freebsd
+            binary-postfix: ""
+            asset-name: freebsd-amd64
 
     steps:
       - uses: actions/checkout@v4
@@ -35,6 +41,14 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.platform.target }}
+
+      # 为 FreeBSD 安装必要的依赖
+      - name: Install FreeBSD target dependencies
+        if: matrix.platform.os-name == 'freebsd'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-multilib pkg-config
+          rustup target add x86_64-unknown-freebsd
 
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2

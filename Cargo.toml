@@ -1,6 +1,6 @@
 [package]
 name = "tgbot-app"
-version = "0.2.8"
+version = "0.2.9"
 edition = "2021"
 authors = ["HZzz2", "Leslie", "hzzz2yb@gmail.com"]
 repository = "https://github.com/HZzz2/tgbot-app"
