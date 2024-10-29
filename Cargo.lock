@@ -3608,7 +3608,7 @@ dependencies = [
 
 [[package]]
 name = "tgbot-app"
-version = "0.2.12"
+version = "0.2.13"
 dependencies = [
  "anyhow",
  "async-channel",
