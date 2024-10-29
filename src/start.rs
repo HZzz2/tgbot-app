@@ -13,7 +13,7 @@ pub async fn start(bot: Bot, ctx: Context) -> Result<GroupIteration> {
         return Ok(GroupIteration::EndGroups);
     }
 
-let help_msg = r#"
+    let help_msg = r#"
 🤖 Telegram Bot 帮助信息
 Rust语言编写并开源 🦀，GitHub：https://github.com/HZzz2/tgbot-app
 

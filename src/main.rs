@@ -160,7 +160,7 @@ Telegram Bot助手
         description: "使用yt-dlp下载画质最佳视频，需下载yt-dlp到工作目录".to_string(),
     });
 
-    dispatcher.add_handler(CommandHandler::new("aria2c",aria2c));
+    dispatcher.add_handler(CommandHandler::new("aria2c", aria2c));
     botcommadns.push(BotCommand {
         command: "aria2c".to_string(),
         description: "使用aria2c下载文件，支持 HTTP/HTTPS、FTP、SFTP、BitTorrent 和 Metalink,默认16线程，下载的文件在aria2c_download目录下".to_string(),
@@ -179,10 +179,10 @@ Telegram Bot助手
     dispatcher.add_handler_to_group(
         MessageHandler::new(
             handler,
-            message::All::filter()   //接收图片和文件以供查杀检验or?
-            // This will restrict our echo function to the messages which
-            // contain either text or a caption.
-            // message::Text::filter().or(message::Caption::filter()),
+            message::All::filter(), //接收图片和文件以供查杀检验or?
+                                    // This will restrict our echo function to the messages which
+                                    // contain either text or a caption.
+                                    // message::Text::filter().or(message::Caption::filter()),
         ),
         1,
     );
@@ -195,9 +195,13 @@ Telegram Bot助手
 
     // This method will start long polling through the getUpdates method
     // let _ = updater.start_polling(true).await;
-    match updater.start_polling(true).await{
-        Ok(_)=>{println!("bot启动成功");},
-        Err(e)=>{eprintln!("bot启动失败:{:?}",e);}
+    match updater.start_polling(true).await {
+        Ok(_) => {
+            println!("bot启动成功");
+        }
+        Err(e) => {
+            eprintln!("bot启动失败:{:?}", e);
+        }
     }
     Ok(())
 }

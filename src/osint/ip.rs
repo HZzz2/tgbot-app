@@ -126,7 +126,6 @@ pub async fn ip(bot: Bot, ctx: Context) -> Result<GroupIteration> {
 }
 
 pub async fn cb_ip123(arg: &str, bot: Bot, chat_id: i64) -> Result<GroupIteration> {
-
     let ip123_output: Value = REQWEST_CLIENT
         .get(format!("https://ip234.in/fraud_check?ip={}", arg))
         .send()

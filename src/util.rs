@@ -1,8 +1,8 @@
 use ferrisgram::Bot;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use tokio::process::Command;
 use std::fmt::Display;
+use tokio::process::Command;
 
 use crate::GLOBAL_CONFIG;
 
@@ -22,7 +22,6 @@ pub fn verify_telegram(id: i64) -> bool {
     GLOBAL_CONFIG.telegram.ids.contains(&id)
 }
 
-
 // 分段消息的发送，telegram单条最多4,096个字符
 pub async fn chunks_msg<T: AsRef<str>>(bot: &Bot, chat_id: i64, message: T) {
     for chunk in message.as_ref().chars().collect::<Vec<char>>().chunks(4000) {
@@ -32,7 +31,7 @@ pub async fn chunks_msg<T: AsRef<str>>(bot: &Bot, chat_id: i64, message: T) {
 }
 
 // 执行单条shell命令单参数并返回输出
-pub async fn execute_one_shell(shell_cmd:String,arg:impl ToString) -> Result<String,String>{
+pub async fn execute_one_shell(shell_cmd: String, arg: impl ToString) -> Result<String, String> {
     let output = Command::new(&shell_cmd)
         .arg(arg.to_string())
         .output()
@@ -41,7 +40,6 @@ pub async fn execute_one_shell(shell_cmd:String,arg:impl ToString) -> Result<Str
         .stdout;
 
     Ok(String::from_utf8_lossy(&output).to_string())
-   
 }
 
 #[derive(Serialize, Deserialize)]
@@ -81,7 +79,9 @@ pub async fn ai_q_s<T: Into<String>>(content: T) -> anyhow::Result<String> {
     let response_body = res.json::<serde_json::Value>().await.unwrap();
     let rep = response_body["choices"][0]["message"]["content"]
         .as_str()
-        .unwrap().trim_start_matches('"').trim_end_matches('"');
+        .unwrap()
+        .trim_start_matches('"')
+        .trim_end_matches('"');
 
     // let _ = bot.send_message(chat_id, rep.to_string()).parse_mode("markdown".to_string()).send().await.unwrap();
     Ok(rep.to_string())

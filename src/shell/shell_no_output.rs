@@ -68,11 +68,19 @@ pub async fn shell_no_output(bot: Bot, ctx: Context) -> Result<GroupIteration> {
 
             let status = output.status;
             if status.success() {
-                bot.send_message(chat_id, format!("执行命令成功！耗时：{}\t命令：{}", time_format, cm))
-                    .send()
-                    .await?;
+                bot.send_message(
+                    chat_id,
+                    format!("执行命令成功！耗时：{}\t命令：{}", time_format, cm),
+                )
+                .send()
+                .await?;
             } else {
-                send_err_msg(bot, chat_id, format!("命令执行失败，耗时：{}\t命令：{}", time_format, cm)).await;
+                send_err_msg(
+                    bot,
+                    chat_id,
+                    format!("命令执行失败，耗时：{}\t命令：{}", time_format, cm),
+                )
+                .await;
             }
         }
         Err(e) => {

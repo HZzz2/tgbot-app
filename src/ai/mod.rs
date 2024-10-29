@@ -10,7 +10,6 @@ pub const PROMPT_SHELL_OUTPUT: &str = "作为Shell命令输出分析AI助手，�
 根据输出，简要推断系统状态或配置。
 请直接提供简洁、专业的分析结果，无需额外解释或建议。请使用Markdown格式组织你的回答，包括适当的标题、列表和代码块。";
 
-
 // ai分析json数据的提示词
 pub const PROMPT_IP_JSON: &str = r#"
 请分析下面的IP信息JSON数据,并提供一个简洁的总结,包括以下要点:

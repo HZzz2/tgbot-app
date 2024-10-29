@@ -23,8 +23,7 @@ pub static REQWEST_CLIENT: Lazy<reqwest::Client> = Lazy::new(|| {
     }
 
     if !GLOBAL_CONFIG.reqwest.proxy.is_empty() {
-        req_builder =
-            req_builder.proxy(reqwest::Proxy::all(&GLOBAL_CONFIG.reqwest.proxy).unwrap())
+        req_builder = req_builder.proxy(reqwest::Proxy::all(&GLOBAL_CONFIG.reqwest.proxy).unwrap())
     }
 
     match req_builder.build() {
@@ -69,7 +68,7 @@ pub struct Chatgpt {
 #[derive(Deserialize, Debug, Clone)]
 pub struct Command {
     // pub cmd: BTreeMap<String, String>,
-    pub cmd: Vec<HashMap<String,String>>
+    pub cmd: Vec<HashMap<String, String>>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -87,7 +86,7 @@ pub struct BruteForce {
 pub struct YtDlp {
     pub cookie: String,
     pub proxy: String,
-    pub args: String
+    pub args: String,
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -101,7 +100,6 @@ pub struct ReSend {
     pub api_key: String,
     pub from: String,
 }
-
 
 // macro_rules! verify_telegram_id {
 //     ($chat_id:expr) => {

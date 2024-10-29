@@ -47,7 +47,10 @@ pub async fn ytdlp(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     });
 
     let msg = bot
-        .send_message(chat_id, format!("正在使用yt-dlp下载视频中···{}",comm_string))
+        .send_message(
+            chat_id,
+            format!("正在使用yt-dlp下载视频中···{}", comm_string),
+        )
         .disable_notification(true)
         .send()
         .await

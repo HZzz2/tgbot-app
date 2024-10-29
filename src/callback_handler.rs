@@ -31,16 +31,20 @@ pub async fn callback_handler(bot: Bot, ctx: Context) -> Result<GroupIteration> 
         ["osint", "dns", "cb_dnsenum", arg] => {
             let _ = cb_dnsenum(arg, bot, chat_id).await;
         }
-        ["AI分析","PROMPT_SHELL_OUTPUT"] => {
-            let res = ai_q_s(format!("{}:\n{}",PROMPT_SHELL_OUTPUT,raw_content)).await.unwrap();
+        ["AI分析", "PROMPT_SHELL_OUTPUT"] => {
+            let res = ai_q_s(format!("{}:\n{}", PROMPT_SHELL_OUTPUT, raw_content))
+                .await
+                .unwrap();
             let _ = bot
                 .send_message(chat_id, res)
                 .parse_mode("markdown".to_string())
                 .send()
                 .await;
         }
-        ["AI分析",prompt] => {
-            let res = ai_q_s(format!("{}:\n{}",prompt,raw_content)).await.unwrap();
+        ["AI分析", prompt] => {
+            let res = ai_q_s(format!("{}:\n{}", prompt, raw_content))
+                .await
+                .unwrap();
             let _ = bot
                 .send_message(chat_id, res)
                 .parse_mode("markdown".to_string())
