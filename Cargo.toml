@@ -1,6 +1,6 @@
 [package]
 name = "tgbot-app"
-version = "0.2.10"
+version = "0.2.11"
 edition = "2021"
 authors = ["HZzz2", "Leslie", "hzzz2yb@gmail.com"]
 repository = "https://github.com/HZzz2/tgbot-app"
@@ -18,7 +18,7 @@ toml = "0.8.19"
 # anyhow = "1.0.86"
 anyhow = { version = "1.0.91", default-features = false }
 once_cell = "1.20.2"
-reqwest = { version = "0.12.9", features = ["json", "rustls-tls", "socks"] }
+reqwest = { version = "0.12.9", default-features = false, features = ["json", "rustls-tls", "socks"] }
 tokio = { version = "1.41.0", features = ["full"] }
 rusty_ytdl = "0.7.4"   # 目前无法下载油管
 # ssh brute

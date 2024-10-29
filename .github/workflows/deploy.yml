@@ -50,41 +50,27 @@ jobs:
           sudo apt-get install -y gcc-multilib pkg-config
           rustup target add x86_64-unknown-freebsd
 
-      # 设置 FreeBSD 的 OpenSSL 环境
-      - name: Setup FreeBSD OpenSSL
+      # 修改 Cargo.toml 添加 vendored 特性
+      - name: Configure OpenSSL vendored
         if: matrix.platform.os-name == 'freebsd'
         run: |
-          # 安装所需的包
-          sudo apt-get install -y cmake ninja-build clang
+          # 备份原始的 Cargo.toml
+          cp Cargo.toml Cargo.toml.backup
           
-          # 下载并编译 OpenSSL
-          wget https://www.openssl.org/source/openssl-1.1.1w.tar.gz
-          tar xzf openssl-1.1.1w.tar.gz
-          cd openssl-1.1.1w
-          
-          # 为 FreeBSD 交叉编译 OpenSSL
-          ./Configure BSD-x86_64 no-shared --prefix=$PWD/../openssl-freebsd
-          make -j$(nproc)
-          make install_sw
-          cd ..
-          
-          # 设置环境变量
-          echo "OPENSSL_DIR=$PWD/openssl-freebsd" >> $GITHUB_ENV
-          echo "OPENSSL_STATIC=yes" >> $GITHUB_ENV
-          
-          # 为交叉编译设置 pkg-config
-          echo "PKG_CONFIG_ALLOW_CROSS=1" >> $GITHUB_ENV
+          # 添加 vendored 特性到 Cargo.toml
+          sed -i '$ a [dependencies.openssl-sys]' Cargo.toml
+          sed -i '$ a version = "0.9"' Cargo.toml
+          sed -i '$ a features = ["vendored"]' Cargo.toml
 
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
 
       - name: Build Binary
         run: cargo build --release --target ${{ matrix.platform.target }}
-        env:
-          # 为 FreeBSD 构建设置特殊环境变量
-          PKG_CONFIG_ALLOW_CROSS: ${{ matrix.platform.os-name == 'freebsd' && '1' || '' }}
-          OPENSSL_STATIC: ${{ matrix.platform.os-name == 'freebsd' && 'yes' || '' }}
-          OPENSSL_DIR: ${{ matrix.platform.os-name == 'freebsd' && env.OPENSSL_DIR || '' }}
+
+      - name: Restore Cargo.toml
+        if: matrix.platform.os-name == 'freebsd'
+        run: mv Cargo.toml.backup Cargo.toml
 
       - name: Prepare Release Archive
         shell: bash
