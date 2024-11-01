@@ -1,22 +1,8 @@
 //! 多功能Telegram机器人，提供了丰富的实用命令和功能。程序设计为以Linux服务的方式运行，并在出错时自动重启，确保稳定可靠的服务。
 //! 推荐在Linux中以服务的方式进行部署 [GitHub](https://github.com/HZzz2/tgbot-app)
 
-use download::aria2c;
-use ferrisgram::ext::filters::callback_query::All;
-use ferrisgram::types::BotCommand;
 use tgbot_app::GLOBAL_CONFIG;
-// use ferrisgram::error::{GroupIteration, Result};
-use ferrisgram::ext::filters::message;
-use ferrisgram::ext::handlers::{CallbackQueryHandler, CommandHandler, MessageHandler};
-use ferrisgram::ext::{Dispatcher, Updater};
-// use ferrisgram::types::LinkPreviewOptions;
-use ferrisgram::Bot;
 
-use tklog::{async_debug, async_fatal, async_info, Format, ASYNC_LOG, LEVEL};
-
-// use ferrisgram::input_file::NamedFile;
-// use tokio::fs::File;
-// use tokio::io::AsyncReadExt;
 mod handler;
 mod start;
 use handler::handler;
@@ -24,16 +10,17 @@ use start::start;
 mod callback_handler;
 use callback_handler::callback_handler;
 
-mod shell;
+pub mod util;
+
+pub mod shell;
 use shell::{c, ls, ping, shell, shell_no_output};
-mod ai;
+pub mod ai;
 use ai::chatgpt;
 
 pub mod download;
-pub use download::ytdlp;
+pub use download::{aria2c, ytdlp};
 
 pub mod server;
-use anyhow::Result;
 pub use server::resend;
 
 pub mod osint;
@@ -42,6 +29,14 @@ pub use osint::{dns, ip};
 pub mod brute_force;
 pub use brute_force::ssh_brute;
 
+use ferrisgram::ext::filters::callback_query::All;
+use ferrisgram::types::BotCommand;
+use ferrisgram::ext::filters::message;
+use ferrisgram::ext::handlers::{CallbackQueryHandler, CommandHandler, MessageHandler};
+use ferrisgram::ext::{Dispatcher, Updater};
+use anyhow::Result;
+use ferrisgram::Bot;
+use tklog::{async_debug, async_fatal, async_info, Format, ASYNC_LOG, LEVEL};
 
 
 /// 配置日志

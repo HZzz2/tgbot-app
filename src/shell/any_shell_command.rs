@@ -1,14 +1,14 @@
+use crate::util::{chunks_msg, send_err_msg};
 use ferrisgram::error::Result;
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
 use std::process::Stdio;
 use std::time::Instant;
-use tgbot_app::util::{chunks_msg, send_err_msg};
 use tokio::process::Command;
 
 pub async fn shell(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     let msg = ctx.effective_message.unwrap();
     let chat_id = msg.chat.id;
-    tgbot_app::verify_telegram_id!(chat_id);
+    crate::verify_telegram_id!(chat_id);
 
     let cm = msg.text.unwrap();
     let cm = &cm[7..].trim(); // 去掉 "/shell " 前缀

@@ -1,19 +1,19 @@
+use crate::ai::PROMPT_IP_JSON;
+use crate::util::REQWEST_CLIENT;
+use crate::util::{ai_q_s, send_err_msg};
+
 use ferrisgram::error::Result;
 use ferrisgram::types::{InlineKeyboardButton, InlineKeyboardMarkup};
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
 use reqwest;
 use serde_json::Value;
-use tgbot_app::util::{ai_q_s, send_err_msg};
-use tgbot_app::REQWEST_CLIENT;
 use tokio::process::Command;
-
-use crate::ai::PROMPT_IP_JSON;
 
 pub async fn ip(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     // Same logic as chat applies on unwrapping effective message here.
     let msg = ctx.effective_message.unwrap();
     let chat_id = msg.chat.id;
-    tgbot_app::verify_telegram_id!(chat_id);
+    crate::verify_telegram_id!(chat_id);
     let cm = msg.text.unwrap();
     let ip = if cm.starts_with('/') {
         // 如果没有提供参数则获取本机IPV4

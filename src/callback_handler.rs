@@ -1,6 +1,6 @@
+use crate::util::ai_q_s;
 use ferrisgram::error::Result;
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
-use tgbot_app::util::ai_q_s;
 
 use crate::ai::PROMPT_SHELL_OUTPUT;
 use crate::osint::{cb_dnsenum, cb_dnsrecon, cb_ip123};
@@ -10,7 +10,7 @@ use crate::osint::{cb_dnsenum, cb_dnsrecon, cb_ip123};
 pub async fn callback_handler(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     let msg = ctx.effective_message.unwrap();
     let chat_id = msg.chat.id;
-    tgbot_app::verify_telegram_id!(chat_id);
+    crate::verify_telegram_id!(chat_id);
     //按钮的原始文本
     let raw_content = msg.text.unwrap();
 

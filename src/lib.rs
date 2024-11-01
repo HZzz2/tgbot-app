@@ -4,10 +4,11 @@ use std::{
 };
 
 use once_cell::sync::Lazy;
-use reqwest::ClientBuilder;
+
 use serde::Deserialize;
 
-pub mod util;
+// pub mod util;
+// pub use util::*;
 // 获取配置文件信息
 pub static GLOBAL_CONFIG: Lazy<Arc<Config>> = Lazy::new(|| {
     // let config_str = include_str!("../config.toml");  // 编译期会将内容包含在可执行程序中
@@ -15,30 +16,6 @@ pub static GLOBAL_CONFIG: Lazy<Arc<Config>> = Lazy::new(|| {
     let config = toml::from_str::<Config>(&config_str).expect("Failed to parse config.toml");
     Arc::new(config)
 });
-
-pub static REQWEST_CLIENT: Lazy<reqwest::Client> = Lazy::new(|| {
-    let mut req_builder = ClientBuilder::new();
-
-    if !GLOBAL_CONFIG.reqwest.user_agent.is_empty() {
-        req_builder = req_builder.user_agent(&GLOBAL_CONFIG.reqwest.user_agent);
-    }
-
-    if !GLOBAL_CONFIG.reqwest.proxy.is_empty() {
-        req_builder = req_builder.proxy(reqwest::Proxy::all(&GLOBAL_CONFIG.reqwest.proxy).unwrap())
-    }
-
-    match req_builder.build() {
-        Ok(client) => client,
-        Err(e) => {
-            // 处理客户端创建错误的情况，例如记录错误日志并采取适当的措施
-            eprintln!("Error creating client: {}", e);
-            panic!("Failed to create reqwest client");
-        }
-    }
-});
-
-// telegram单条消息长度不能超过4096个字符
-pub const MESSAGE_LEN: usize = 4000;
 
 // 反序列化配置信息
 #[derive(Deserialize, Debug, Clone)]

@@ -1,10 +1,15 @@
 use ferrisgram::Bot;
+use once_cell::sync::Lazy;
 use reqwest::Client;
+use reqwest::ClientBuilder;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use tokio::process::Command;
 
 use crate::GLOBAL_CONFIG;
+
+// telegram单条消息长度不能超过4096个字符
+pub const MESSAGE_LEN: usize = 4000;
 
 /// 验证ID是否存在于配置文件中
 #[inline]
@@ -16,12 +21,33 @@ pub fn verify_telegram(id: i64) -> bool {
 #[macro_export]
 macro_rules! verify_telegram_id {
     ($chat_id:expr) => {
-        if !tgbot_app::util::verify_telegram($chat_id) {
+        if !$crate::util::verify_telegram($chat_id) {
             tklog::async_fatal!("未知TelegramID调用命令：", $chat_id);
             return Ok(GroupIteration::EndGroups);
         }
     };
 }
+
+pub static REQWEST_CLIENT: Lazy<reqwest::Client> = Lazy::new(|| {
+    let mut req_builder = ClientBuilder::new();
+
+    if !GLOBAL_CONFIG.reqwest.user_agent.is_empty() {
+        req_builder = req_builder.user_agent(&GLOBAL_CONFIG.reqwest.user_agent);
+    }
+
+    if !GLOBAL_CONFIG.reqwest.proxy.is_empty() {
+        req_builder = req_builder.proxy(reqwest::Proxy::all(&GLOBAL_CONFIG.reqwest.proxy).unwrap())
+    }
+
+    match req_builder.build() {
+        Ok(client) => client,
+        Err(e) => {
+            // 处理客户端创建错误的情况，例如记录错误日志并采取适当的措施
+            eprintln!("Error creating client: {}", e);
+            panic!("Failed to create reqwest client");
+        }
+    }
+});
 
 /// 出现失败后向用户发送失败信息
 #[inline]

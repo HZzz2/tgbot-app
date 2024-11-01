@@ -1,5 +1,6 @@
 use ferrisgram::error::Result;
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
+
 // use tokio::{fs::File, io::AsyncReadExt};
 
 // This is our callable function for the command handler that we declared earlier
@@ -8,7 +9,7 @@ pub async fn start(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     // Same logic as chat applies on unwrapping effective message here.
     let msg = ctx.effective_message.unwrap();
     let chat_id = msg.chat.id;
-    tgbot_app::verify_telegram_id!(chat_id);
+    crate::verify_telegram_id!(chat_id);
 
     let help_msg = r#"
 🤖 Telegram Bot 帮助信息

@@ -1,16 +1,17 @@
+use crate::util::send_err_msg;
 use ferrisgram::error::GroupIteration;
 use ferrisgram::error::Result;
 use ferrisgram::ext::Context;
 use ferrisgram::Bot;
 use resend_rs::types::CreateEmailBaseOptions;
 use resend_rs::Resend;
-use tgbot_app::util::send_err_msg;
-use tgbot_app::GLOBAL_CONFIG;
+// use crate::verify_telegram_id;
+use crate::GLOBAL_CONFIG;
 
 pub async fn resend(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     let msg = ctx.effective_message.unwrap();
     let chat_id = msg.chat.id;
-    tgbot_app::verify_telegram_id!(chat_id);
+    crate::verify_telegram_id!(chat_id);
 
     let api_key = &GLOBAL_CONFIG.resend.api_key;
     let from = &GLOBAL_CONFIG.resend.from;

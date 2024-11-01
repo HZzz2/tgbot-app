@@ -1,14 +1,14 @@
+use crate::util::chunks_msg;
+use crate::{util::send_err_msg, GLOBAL_CONFIG};
 use ferrisgram::error::Result;
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
-use tgbot_app::util::chunks_msg;
-use tgbot_app::{util::send_err_msg, GLOBAL_CONFIG};
 use tokio::process::Command;
 
 pub async fn c(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     // Same logic as chat applies on unwrapping effective message here.
     let msg = ctx.effective_message.unwrap();
     let chat_id = msg.chat.id;
-    tgbot_app::verify_telegram_id!(chat_id);
+    crate::verify_telegram_id!(chat_id);
     let cmd = &GLOBAL_CONFIG.command.cmd;
     let cm = msg.text.unwrap();
     if cm.len() == 2 {

@@ -1,13 +1,13 @@
 use ferrisgram::error::Result;
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
 
-use tgbot_app::util::ai_q_s;
+use crate::util::ai_q_s;
 
 pub async fn chatgpt(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     // Same logic as chat applies on unwrapping effective message here.
     let msg = ctx.effective_message.unwrap();
     let chat_id = msg.chat.id;
-    tgbot_app::verify_telegram_id!(chat_id);
+    crate::verify_telegram_id!(chat_id);
     let cm = msg.text.unwrap();
     // let cm = cm[9..].trim();
     // 默认为AI问答，如果是从handle过来的则不去除前面的命令

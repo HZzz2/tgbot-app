@@ -9,8 +9,8 @@ use tokio::io::AsyncWriteExt;
 
 use crate::ai::chatgpt;
 use crate::download::ytdlp_audio;
-use tgbot_app::util::execute_one_shell;
-use tgbot_app::REQWEST_CLIENT;
+use crate::util::execute_one_shell;
+use crate::util::REQWEST_CLIENT;
 
 // use crate::yt_audio;
 // 消息处理函数
@@ -22,7 +22,7 @@ pub async fn handler(bot: Bot, ctx: Context) -> Result<GroupIteration> {
 
     let msg = ctx.clone().effective_message.unwrap();
     let chat_id = msg.chat.id;
-    tgbot_app::verify_telegram_id!(chat_id);
+    crate::verify_telegram_id!(chat_id);
 
     //TODO 接收图片  。。。
     // 目前下载图片后对图片进行file和exiftool命令，发现telegram会对png图片转为jpg

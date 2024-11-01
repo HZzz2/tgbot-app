@@ -1,15 +1,14 @@
+use crate::util::{chunks_msg, MESSAGE_LEN};
 use ferrisgram::error::Result;
 use ferrisgram::types::{InlineKeyboardButton, InlineKeyboardMarkup};
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
-use tgbot_app::util::chunks_msg;
-use tgbot_app::MESSAGE_LEN;
 use tokio::process::Command;
 
 pub async fn dns(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     // Same logic as chat applies on unwrapping effective message here.
     let msg = ctx.effective_message.unwrap();
     let chat_id = msg.chat.id;
-    tgbot_app::verify_telegram_id!(chat_id);
+    crate::verify_telegram_id!(chat_id);
     let cm = msg.text.unwrap();
     let d = if cm.starts_with('/') {
         cm[5..].trim()

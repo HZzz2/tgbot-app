@@ -1,7 +1,7 @@
 use std::path::Path;
 
+use crate::GLOBAL_CONFIG;
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
-use tgbot_app::GLOBAL_CONFIG;
 
 use ferrisgram::error::Result;
 
@@ -9,7 +9,7 @@ pub async fn ytdlp(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     // Same logic as chat applies on unwrapping effective message here.
     let msg = ctx.effective_message.unwrap();
     let chat_id = msg.chat.id;
-    tgbot_app::verify_telegram_id!(chat_id);
+    crate::verify_telegram_id!(chat_id);
     let cm = msg.text.unwrap();
     let link = cm[7..].trim();
 
