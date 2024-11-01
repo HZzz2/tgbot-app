@@ -13,9 +13,7 @@ pub async fn ip(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     // Same logic as chat applies on unwrapping effective message here.
     let msg = ctx.effective_message.unwrap();
     let chat_id = msg.chat.id;
-    if !verify_telegram(chat_id) {
-        return Ok(GroupIteration::EndGroups);
-    }
+    tgbot_app::verify_telegram_id!(chat_id);
     let cm = msg.text.unwrap();
     let ip = if cm.starts_with('/') {
         // 如果没有提供参数则获取本机IPV4

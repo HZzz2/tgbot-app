@@ -23,9 +23,7 @@ pub async fn ssh_brute(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     // Same logic as chat applies on unwrapping effective message here.
     let msg = ctx.effective_message.unwrap();
     let chat_id = msg.chat.id;
-    if !verify_telegram(chat_id) {
-        return Ok(GroupIteration::EndGroups);
-    }
+    tgbot_app::verify_telegram_id!(chat_id);
     let cm = msg.text.unwrap();
 
     let message_first_text = bot
@@ -40,18 +38,21 @@ pub async fn ssh_brute(bot: Bot, ctx: Context) -> Result<GroupIteration> {
 
     let host = Arc::new(cm[11..].trim().to_owned());
 
+    // 获取用户名，默认为 root
     let username = GLOBAL_CONFIG
         .brute_force
         .ssh
         .get("username")
         .map(|un| un.as_str())
         .unwrap();
+    // 获取ssh端口，默认为 22
     let port: u16 = GLOBAL_CONFIG
         .brute_force
         .ssh
         .get("port")
         .and_then(|port_str| port_str.parse().ok())
         .unwrap_or(22);
+    // 获取字典，默认为 ./ssh_password.txt
     let brute_file = GLOBAL_CONFIG
         .brute_force
         .ssh
@@ -59,7 +60,7 @@ pub async fn ssh_brute(bot: Bot, ctx: Context) -> Result<GroupIteration> {
         .map(|s| s.as_str())
         .unwrap();
 
-    // 发送文件的每一行进行处理
+    // 发送密码字典文件的每一行进行处理
     let (tx, rx) = async_channel::unbounded();
     let send_password_joinhandle = tokio::spawn(async move {
         let file = File::open(brute_file).await.unwrap();
@@ -70,7 +71,7 @@ pub async fn ssh_brute(bot: Bot, ctx: Context) -> Result<GroupIteration> {
         drop(tx);
     });
 
-    // 并发任务数
+    // 并发任务数，默认为 16
     let task_count: usize = GLOBAL_CONFIG
         .brute_force
         .ssh

@@ -9,9 +9,7 @@ pub async fn dns(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     // Same logic as chat applies on unwrapping effective message here.
     let msg = ctx.effective_message.unwrap();
     let chat_id = msg.chat.id;
-    if !verify_telegram(chat_id) {
-        return Ok(GroupIteration::EndGroups);
-    }
+    tgbot_app::verify_telegram_id!(chat_id);
     let cm = msg.text.unwrap();
     let d = if cm.starts_with('/') {
         cm[5..].trim()

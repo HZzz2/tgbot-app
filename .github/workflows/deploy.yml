@@ -13,21 +13,20 @@ jobs:
       matrix:
         platform:
           - os: ubuntu-latest
+            os-name: linux
             target: x86_64-unknown-linux-gnu
             binary-postfix: ""
             asset-name: linux-amd64
           - os: windows-latest
+            os-name: windows
             target: x86_64-pc-windows-msvc
             binary-postfix: ".exe"
             asset-name: windows-amd64
           - os: macos-latest
+            os-name: macos
             target: x86_64-apple-darwin
             binary-postfix: ""
             asset-name: darwin-amd64
-          - os: freebsd-latest
-            target: x86_64-unknown-freebsd
-            binary-postfix: ""
-            asset-name: freebsd-amd64
 
     steps:
       - uses: actions/checkout@v4
@@ -36,11 +35,6 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.platform.target }}
-
-      - name: Install OpenSSL on FreeBSD
-        if: ${{ matrix.platform.os == 'freebsd-latest' }}
-        run: |
-          pkg install -y openssl
 
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
@@ -51,13 +45,21 @@ jobs:
       - name: Prepare Release Archive
         shell: bash
         run: |
+          # 从 Cargo.toml 读取二进制名称（假设与包名相同）
           BINARY_NAME=$(grep -m1 '^name = ' Cargo.toml | cut -d '"' -f2)
-          RELEASE_DIR="release"
-          mkdir -p "$RELEASE_DIR"
-          cp target/${{ matrix.platform.target }}/release/$BINARY_NAME${{ matrix.platform.binary-postfix }} "$RELEASE_DIR/"
-          cp README.md LICENSE "$RELEASE_DIR/" 2>/dev/null || true
           
-          cd "$RELEASE_DIR"
+          # 创建发布目录
+          mkdir release
+          
+          # 复制二进制文件并重命名
+          cp target/${{ matrix.platform.target }}/release/$BINARY_NAME${{ matrix.platform.binary-postfix }} release/
+          
+          # 复制README和LICENSE等文件（如果存在）
+          cp README.md release/ 2>/dev/null || true
+          cp LICENSE release/ 2>/dev/null || true
+          
+          # 创建压缩包
+          cd release
           if [[ "${{ matrix.platform.os }}" == "windows-latest" ]]; then
             7z a -tzip "../$BINARY_NAME-${{ matrix.platform.asset-name }}.zip" *
           else

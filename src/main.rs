@@ -9,6 +9,8 @@ use ferrisgram::ext::{Dispatcher, Updater};
 // use ferrisgram::types::LinkPreviewOptions;
 use ferrisgram::Bot;
 
+use tklog::{async_debug, async_fatal, async_info, Format, ASYNC_LOG, LEVEL};
+
 // use ferrisgram::input_file::NamedFile;
 // use tokio::fs::File;
 // use tokio::io::AsyncReadExt;
@@ -25,7 +27,7 @@ mod ai;
 use ai::chatgpt;
 
 pub mod download;
-pub use download::{yt_audio, ytdlp};
+pub use download::ytdlp;
 
 pub mod server;
 use anyhow::Result;
@@ -37,17 +39,51 @@ pub use osint::{dns, ip};
 pub mod brute_force;
 pub use brute_force::ssh_brute;
 
+// 配置日志
+async fn async_log_init() {
+    let logger = ASYNC_LOG;
+
+    // 判断是debug还是release编译
+    if cfg!(debug_assertions) {
+        // 配置全局单例
+        logger
+            .set_console(true) // 开启控制台输出
+            .set_level(LEVEL::Debug) // Set log level to Debug
+            .set_format(Format::LevelFlag | Format::Date | Format::Time | Format::LongFileName);
+        async_debug!("tgbot-app正在启动中，已开启debug模式日志");
+    } else {
+        // 配置全局单例
+        logger
+            .set_console(false) // Disable console output
+            .set_level(LEVEL::Info) // Set log level to Info
+            .set_format(Format::LevelFlag | Format::Date | Format::Time | Format::LongFileName) // Define structured logging output
+            .set_cutmode_by_time("./logs/tgbot-app-log.log", tklog::MODE::MONTH, 3, true) // 每月，三次备份，压缩
+            .await;
+        async_info!("tgbot-app正在启动中，已开启release模式日志");
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
+    async_log_init().await;
+
     // 获取配置文件信息
     let config = GLOBAL_CONFIG.clone();
+    async_debug!("config info:", format!("{:#?}", config));
 
     let bot_token = &config.telegram.bot_token;
     // 此函数创建一个新的机器人实例并相应地处理错误
     let bot = match Bot::new(bot_token, None).await {
-        Ok(bot) => bot,
-        Err(error) => panic!("无法创建bot: {}", error),
+        Ok(bot) => {
+            async_info!("tgbot-app启动成功");
+            bot
+        }
+        Err(error) => {
+            async_fatal!("创建tgbot-app失败");
+            panic!("创建tgbot-app失败: {}", error)
+        }
     };
+
     let short_des = r#"
 Telegram Bot助手
 开源地址:https://github.com/HZzz2/tgbot-app
@@ -59,6 +95,7 @@ Telegram Bot助手
 可通过机器人执行shell命令，信息搜集，常用命令执行，发送邮件，下载音频或视频等等
     "#
     .to_string();
+
     bot.set_my_description()
         .description(des)
         .send()
@@ -186,6 +223,7 @@ Telegram Bot助手
         ),
         1,
     );
+    // 回调
     dispatcher.add_handler_to_group(
         CallbackQueryHandler::new(callback_handler, All::filter()),
         1,
@@ -197,10 +235,10 @@ Telegram Bot助手
     // let _ = updater.start_polling(true).await;
     match updater.start_polling(true).await {
         Ok(_) => {
-            println!("bot启动成功");
+            async_info!("tgbot-app开启长轮询成功");
         }
         Err(e) => {
-            eprintln!("bot启动失败:{:?}", e);
+            async_fatal!("tgbot-app开启长轮询失败:{:?}", e);
         }
     }
     Ok(())

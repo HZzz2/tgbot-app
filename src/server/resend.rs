@@ -11,9 +11,7 @@ use tgbot_app::GLOBAL_CONFIG;
 pub async fn resend(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     let msg = ctx.effective_message.unwrap();
     let chat_id = msg.chat.id;
-    if !verify_telegram(chat_id) {
-        return Ok(GroupIteration::EndGroups);
-    }
+    tgbot_app::verify_telegram_id!(chat_id);
 
     let api_key = &GLOBAL_CONFIG.resend.api_key;
     let from = &GLOBAL_CONFIG.resend.from;

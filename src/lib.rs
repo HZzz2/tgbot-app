@@ -6,6 +6,7 @@ use std::{
 use once_cell::sync::Lazy;
 use reqwest::ClientBuilder;
 use serde::Deserialize;
+
 pub mod util;
 // 获取配置文件信息
 pub static GLOBAL_CONFIG: Lazy<Arc<Config>> = Lazy::new(|| {
@@ -100,11 +101,3 @@ pub struct ReSend {
     pub api_key: String,
     pub from: String,
 }
-
-// macro_rules! verify_telegram_id {
-//     ($chat_id:expr) => {
-//         if!verify_telegram($chat_id) {
-//             return Ok(GroupIteration::EndGroups);
-//         }
-//     };
-// }

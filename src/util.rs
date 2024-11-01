@@ -6,6 +6,22 @@ use tokio::process::Command;
 
 use crate::GLOBAL_CONFIG;
 
+// 验证ID是否存在于配置文件中
+#[inline]
+pub fn verify_telegram(id: i64) -> bool {
+    GLOBAL_CONFIG.telegram.ids.contains(&id)
+}
+
+#[macro_export]
+macro_rules! verify_telegram_id {
+    ($chat_id:expr) => {
+        if !verify_telegram($chat_id) {
+            tklog::async_fatal!("未知TelegramID调用命令：", $chat_id);
+            return Ok(GroupIteration::EndGroups);
+        }
+    };
+}
+
 // 出现失败后向用户发送失败信息
 #[inline]
 pub async fn send_err_msg<T: Display>(bot: Bot, chat_id: i64, msg: T) {
@@ -14,12 +30,6 @@ pub async fn send_err_msg<T: Display>(bot: Bot, chat_id: i64, msg: T) {
         .parse_mode(String::from("markdown"))
         .send()
         .await;
-}
-
-// 验证ID是否存在于配置文件中
-#[inline]
-pub fn verify_telegram(id: i64) -> bool {
-    GLOBAL_CONFIG.telegram.ids.contains(&id)
 }
 
 // 分段消息的发送，telegram单条最多4,096个字符
