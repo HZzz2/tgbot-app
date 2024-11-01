@@ -2,7 +2,7 @@ use ferrisgram::error::Result;
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
 use std::process::Stdio;
 use std::time::Instant;
-use tgbot_app::util::{send_err_msg, verify_telegram};
+use tgbot_app::util::send_err_msg;
 use tokio::process::Command;
 
 pub async fn shell_no_output(bot: Bot, ctx: Context) -> Result<GroupIteration> {

@@ -1,10 +1,14 @@
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
-use tgbot_app::util::verify_telegram;
+// use tgbot_app::util::verify_telegram;
 use tklog::{async_error, async_info};
 use tokio::process::Command;
 
 use ferrisgram::error::Result;
 
+/// 列出当前目录下的内容，不支持指定参数，默认参数为-lah
+/// ```txt
+/// /ls
+/// ```
 pub async fn ls(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     // Same logic as chat applies on unwrapping effective message here.
     let msg = ctx.effective_message.unwrap();

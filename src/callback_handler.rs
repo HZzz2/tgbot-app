@@ -1,6 +1,6 @@
 use ferrisgram::error::Result;
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
-use tgbot_app::util::{ai_q_s, verify_telegram};
+use tgbot_app::util::ai_q_s;
 
 use crate::ai::PROMPT_SHELL_OUTPUT;
 use crate::osint::{cb_dnsenum, cb_dnsrecon, cb_ip123};

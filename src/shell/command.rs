@@ -1,6 +1,6 @@
 use ferrisgram::error::Result;
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
-use tgbot_app::util::{chunks_msg, verify_telegram};
+use tgbot_app::util::chunks_msg;
 use tgbot_app::{util::send_err_msg, GLOBAL_CONFIG};
 use tokio::process::Command;
 

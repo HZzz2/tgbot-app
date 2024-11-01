@@ -9,7 +9,7 @@ use tokio::io::AsyncWriteExt;
 
 use crate::ai::chatgpt;
 use crate::download::ytdlp_audio;
-use tgbot_app::util::{execute_one_shell, verify_telegram};
+use tgbot_app::util::execute_one_shell;
 use tgbot_app::REQWEST_CLIENT;
 
 // use crate::yt_audio;

@@ -1,7 +1,7 @@
 use ferrisgram::error::Result;
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
 
-use tgbot_app::util::{ai_q_s, verify_telegram};
+use tgbot_app::util::ai_q_s;
 
 pub async fn chatgpt(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     // Same logic as chat applies on unwrapping effective message here.

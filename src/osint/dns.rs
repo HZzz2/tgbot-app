@@ -1,7 +1,7 @@
 use ferrisgram::error::Result;
 use ferrisgram::types::{InlineKeyboardButton, InlineKeyboardMarkup};
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
-use tgbot_app::util::{chunks_msg, verify_telegram};
+use tgbot_app::util::chunks_msg;
 use tgbot_app::MESSAGE_LEN;
 use tokio::process::Command;
 

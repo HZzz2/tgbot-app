@@ -1,3 +1,7 @@
+//! AI相关模块
+//! 在不匹配其它命令的情况默认为AI问答，单次对话
+
+
 mod chatgpt;
 
 pub use chatgpt::chatgpt;

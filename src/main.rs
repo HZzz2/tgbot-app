@@ -1,3 +1,6 @@
+//! 多功能Telegram机器人，提供了丰富的实用命令和功能。程序设计为以Linux服务的方式运行，并在出错时自动重启，确保稳定可靠的服务。
+//! 推荐在Linux中以服务的方式进行部署 [GitHub](https://github.com/HZzz2/tgbot-app)
+
 use download::aria2c;
 use ferrisgram::ext::filters::callback_query::All;
 use ferrisgram::types::BotCommand;
@@ -39,7 +42,9 @@ pub use osint::{dns, ip};
 pub mod brute_force;
 pub use brute_force::ssh_brute;
 
-// 配置日志
+
+
+/// 配置日志
 async fn async_log_init() {
     let logger = ASYNC_LOG;
 

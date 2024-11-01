@@ -1,6 +1,5 @@
 use ferrisgram::error::Result;
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
-use tgbot_app::util::verify_telegram;
 // use tokio::{fs::File, io::AsyncReadExt};
 
 // This is our callable function for the command handler that we declared earlier

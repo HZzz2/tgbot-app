@@ -6,23 +6,24 @@ use tokio::process::Command;
 
 use crate::GLOBAL_CONFIG;
 
-// 验证ID是否存在于配置文件中
+/// 验证ID是否存在于配置文件中
 #[inline]
 pub fn verify_telegram(id: i64) -> bool {
     GLOBAL_CONFIG.telegram.ids.contains(&id)
 }
 
+/// 验证telegram-id的宏，减少样板代码
 #[macro_export]
 macro_rules! verify_telegram_id {
     ($chat_id:expr) => {
-        if !verify_telegram($chat_id) {
+        if !tgbot_app::util::verify_telegram($chat_id) {
             tklog::async_fatal!("未知TelegramID调用命令：", $chat_id);
             return Ok(GroupIteration::EndGroups);
         }
     };
 }
 
-// 出现失败后向用户发送失败信息
+/// 出现失败后向用户发送失败信息
 #[inline]
 pub async fn send_err_msg<T: Display>(bot: Bot, chat_id: i64, msg: T) {
     let _ = bot
@@ -32,7 +33,7 @@ pub async fn send_err_msg<T: Display>(bot: Bot, chat_id: i64, msg: T) {
         .await;
 }
 
-// 分段消息的发送，telegram单条最多4,096个字符
+/// 分段消息的发送，telegram单条最多4,096个字符
 pub async fn chunks_msg<T: AsRef<str>>(bot: &Bot, chat_id: i64, message: T) {
     for chunk in message.as_ref().chars().collect::<Vec<char>>().chunks(4000) {
         let chunk_str: String = chunk.iter().collect();

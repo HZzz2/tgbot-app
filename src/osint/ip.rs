@@ -3,7 +3,7 @@ use ferrisgram::types::{InlineKeyboardButton, InlineKeyboardMarkup};
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
 use reqwest;
 use serde_json::Value;
-use tgbot_app::util::{ai_q_s, send_err_msg, verify_telegram};
+use tgbot_app::util::{ai_q_s, send_err_msg};
 use tgbot_app::REQWEST_CLIENT;
 use tokio::process::Command;
 

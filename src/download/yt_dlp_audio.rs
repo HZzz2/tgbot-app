@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
-use tgbot_app::{util::verify_telegram, GLOBAL_CONFIG};
+use tgbot_app::GLOBAL_CONFIG;
 
 use ferrisgram::error::Result;
 // use tokio::process::Command;

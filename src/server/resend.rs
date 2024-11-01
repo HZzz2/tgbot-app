@@ -5,7 +5,6 @@ use ferrisgram::Bot;
 use resend_rs::types::CreateEmailBaseOptions;
 use resend_rs::Resend;
 use tgbot_app::util::send_err_msg;
-use tgbot_app::util::verify_telegram;
 use tgbot_app::GLOBAL_CONFIG;
 
 pub async fn resend(bot: Bot, ctx: Context) -> Result<GroupIteration> {
