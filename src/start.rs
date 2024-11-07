@@ -9,7 +9,7 @@ pub async fn start(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     // Same logic as chat applies on unwrapping effective message here.
     let msg = ctx.effective_message.unwrap();
     let chat_id = msg.chat.id;
-    crate::verify_telegram_id!(chat_id);
+    tgbot_app::verify_telegram_id!(chat_id);
 
     let help_msg = r#"
 🤖 Telegram Bot 帮助信息

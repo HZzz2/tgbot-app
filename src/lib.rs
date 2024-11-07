@@ -7,9 +7,16 @@ use once_cell::sync::Lazy;
 
 use serde::Deserialize;
 
-// pub mod util;
-// pub use util::*;
-// 获取配置文件信息
+// pub mod macros;
+pub mod ai;
+pub mod brute_force;
+pub mod download;
+pub mod osint;
+pub mod server;
+pub mod shell;
+pub mod util;
+
+/// 获取tgbot-app配置文件信息
 pub static GLOBAL_CONFIG: Lazy<Arc<Config>> = Lazy::new(|| {
     // let config_str = include_str!("../config.toml");  // 编译期会将内容包含在可执行程序中
     let config_str = std::fs::read_to_string("./config.toml").expect("未找到config.toml");

@@ -1,6 +1,15 @@
 //! 多功能Telegram机器人，提供了丰富的实用命令和功能。程序设计为以Linux服务的方式运行，并在出错时自动重启，确保稳定可靠的服务。
 //! 推荐在Linux中以服务的方式进行部署 [GitHub](https://github.com/HZzz2/tgbot-app)
 
+use anyhow::Result;
+use ferrisgram::ext::filters::callback_query::All;
+use ferrisgram::ext::filters::message;
+use ferrisgram::ext::handlers::{CallbackQueryHandler, CommandHandler, MessageHandler};
+use ferrisgram::ext::{Dispatcher, Updater};
+use ferrisgram::types::BotCommand;
+use ferrisgram::Bot;
+use tklog::{async_debug, async_fatal, async_info, Format, ASYNC_LOG, LEVEL};
+
 use tgbot_app::GLOBAL_CONFIG;
 
 mod handler;
@@ -29,17 +38,7 @@ pub use osint::{dns, ip};
 pub mod brute_force;
 pub use brute_force::ssh_brute;
 
-use ferrisgram::ext::filters::callback_query::All;
-use ferrisgram::types::BotCommand;
-use ferrisgram::ext::filters::message;
-use ferrisgram::ext::handlers::{CallbackQueryHandler, CommandHandler, MessageHandler};
-use ferrisgram::ext::{Dispatcher, Updater};
-use anyhow::Result;
-use ferrisgram::Bot;
-use tklog::{async_debug, async_fatal, async_info, Format, ASYNC_LOG, LEVEL};
-
-
-/// 配置日志
+/// 配置日志 - debug:控制台输出日志 ；release：文件输出日志
 async fn async_log_init() {
     let logger = ASYNC_LOG;
 
