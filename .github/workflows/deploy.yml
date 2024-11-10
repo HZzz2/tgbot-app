@@ -2,14 +2,14 @@ name: Build and Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    tags: ['v*']
 
 jobs:
   release:
     name: Release - ${{ matrix.platform.os }}
     runs-on: ${{ matrix.platform.os }}
     strategy:
+      fail-fast: false  # 允许其他平台继续构建即使某个平台失败
       matrix:
         platform:
           - os: ubuntu-latest
@@ -17,59 +17,90 @@ jobs:
             target: x86_64-unknown-linux-gnu
             binary-postfix: ""
             asset-name: linux-amd64
-          - os: windows-latest
-            os-name: windows
-            target: x86_64-pc-windows-msvc
-            binary-postfix: ".exe"
-            asset-name: windows-amd64
           - os: macos-latest
             os-name: macos
             target: x86_64-apple-darwin
             binary-postfix: ""
             asset-name: darwin-amd64
+          # Windows 配置保留注释以便需要时快速启用
+          # - os: windows-latest
+          #   os-name: windows
+          #   target: x86_64-pc-windows-msvc
+          #   binary-postfix: ".exe"
+          #   asset-name: windows-amd64
+
+    env:
+      CARGO_TERM_COLOR: always
+      BINARY_NAME: ${{ github.event.repository.name }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Install Rust
+      - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.platform.target }}
 
-      - name: Rust Cache
+      - name: Setup Rust cache
         uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+          shared-key: "${{ matrix.platform.target }}"
 
-      - name: Build Binary
-        run: cargo build --release --target ${{ matrix.platform.target }}
+      - name: Build release binary
+        run: |
+          cargo build --release --target ${{ matrix.platform.target }}
+          # 显示构建产物的大小
+          ls -lh target/${{ matrix.platform.target }}/release/${{ env.BINARY_NAME }}${{ matrix.platform.binary-postfix }}
 
-      - name: Prepare Release Archive
+      - name: Generate documentation
+        if: matrix.platform.os == 'ubuntu-latest'
+        run: cargo doc --no-deps --document-private-items
+
+      - name: Prepare release archive
         shell: bash
         run: |
-          # 从 Cargo.toml 读取二进制名称（假设与包名相同）
-          BINARY_NAME=$(grep -m1 '^name = ' Cargo.toml | cut -d '"' -f2)
+          mkdir -p release
+          # 复制构建产物
+          cp target/${{ matrix.platform.target }}/release/${{ env.BINARY_NAME }}${{ matrix.platform.binary-postfix }} release/
           
-          # 创建发布目录
-          mkdir release
+          # 复制文档文件
+          for file in README.md LICENSE CHANGELOG.md; do
+            if [ -f "$file" ]; then
+              cp "$file" release/
+            fi
+          done
           
-          # 复制二进制文件并重命名
-          cp target/${{ matrix.platform.target }}/release/$BINARY_NAME${{ matrix.platform.binary-postfix }} release/
-          
-          # 复制README和LICENSE等文件（如果存在）
-          cp README.md release/ 2>/dev/null || true
-          cp LICENSE release/ 2>/dev/null || true
-          
-          # 创建压缩包
           cd release
-          if [[ "${{ matrix.platform.os }}" == "windows-latest" ]]; then
-            7z a -tzip "../$BINARY_NAME-${{ matrix.platform.asset-name }}.zip" *
+          # 使用 tar.gz 格式压缩，更适合跨平台
+          tar -czf "../${{ env.BINARY_NAME }}-${{ matrix.platform.asset-name }}.tar.gz" *
+          
+          # 计算并保存校验和
+          if command -v sha256sum > /dev/null; then
+            sha256sum "../${{ env.BINARY_NAME }}-${{ matrix.platform.asset-name }}.tar.gz" > "../${{ env.BINARY_NAME }}-${{ matrix.platform.asset-name }}.sha256"
           else
-            tar czf "../$BINARY_NAME-${{ matrix.platform.asset-name }}.tar.gz" *
+            shasum -a 256 "../${{ env.BINARY_NAME }}-${{ matrix.platform.asset-name }}.tar.gz" > "../${{ env.BINARY_NAME }}-${{ matrix.platform.asset-name }}.sha256"
           fi
 
-      - name: Upload Release Asset
+      - name: Prepare documentation archive
+        if: matrix.platform.os == 'ubuntu-latest'
+        run: |
+          cd target/doc
+          tar -czf "../../${{ env.BINARY_NAME }}-docs.tar.gz" *
+          cd ../..
+          if command -v sha256sum > /dev/null; then
+            sha256sum "${{ env.BINARY_NAME }}-docs.tar.gz" > "${{ env.BINARY_NAME }}-docs.sha256"
+          else
+            shasum -a 256 "${{ env.BINARY_NAME }}-docs.tar.gz" > "${{ env.BINARY_NAME }}-docs.sha256"
+          fi
+
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            ${{ github.event.repository.name }}-${{ matrix.platform.asset-name }}.*
+            ${{ env.BINARY_NAME }}-${{ matrix.platform.asset-name }}.*
+            ${{ env.BINARY_NAME }}-docs.*
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

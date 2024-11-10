@@ -3,6 +3,7 @@ use std::path::Path;
 use ferrisgram::error::Result;
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
 
+use tklog::async_warn;
 use tokio::fs::DirBuilder;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
@@ -78,6 +79,7 @@ pub async fn handler(bot: Bot, ctx: Context) -> Result<GroupIteration> {
 
     // 斜杠视为命令 不知道为什么/c命令会进来，其它命令不会
     if content.starts_with('/') {
+        async_warn!(content,"进入handler,视为命令,不做处理------");
         return Ok(GroupIteration::EndGroups);
     }
     // println!("handler content:{}",content);
@@ -99,7 +101,7 @@ pub async fn handler(bot: Bot, ctx: Context) -> Result<GroupIteration> {
         return Ok(GroupIteration::EndGroups);
     }
 
-    //todo!  ip? domain?
+    //todo!  如果是直接发送的 ip domain
 
     //TODO 接收文件 发送云沙箱
 
