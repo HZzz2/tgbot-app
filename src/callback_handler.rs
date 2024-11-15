@@ -8,9 +8,12 @@ use crate::osint::{cb_dnsenum, cb_dnsrecon, cb_ip123};
 
 // 消息处理函数
 pub async fn callback_handler(bot: Bot, ctx: Context) -> Result<GroupIteration> {
-    let msg = ctx.effective_message.unwrap();
+    let msg = ctx.clone().effective_message.unwrap();
+    let user_id = ctx.clone().effective_user.unwrap().id;
+    
+    tgbot_app::verify_telegram_id!(user_id);
+
     let chat_id = msg.chat.id;
-    tgbot_app::verify_telegram_id!(chat_id);
     //按钮的原始文本
     let raw_content = msg.text.unwrap();
 

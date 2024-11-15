@@ -22,7 +22,7 @@ pub fn verify_telegram(id: i64) -> bool {
 macro_rules! verify_telegram_id {
     ($chat_id:expr) => {
         if !$crate::util::verify_telegram($chat_id) {
-            tklog::async_fatal!("未知TelegramID调用命令：", $chat_id);
+            tklog::async_fatal!("未知TelegramID进入handler：", $chat_id);
             return Ok(GroupIteration::EndGroups);
         }
     };

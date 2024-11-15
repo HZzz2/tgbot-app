@@ -8,6 +8,7 @@ use ferrisgram::ext::handlers::{CallbackQueryHandler, CommandHandler, MessageHan
 use ferrisgram::ext::{Dispatcher, Updater};
 use ferrisgram::types::BotCommand;
 use ferrisgram::Bot;
+// use tgbot_app::brute_force::sha1_cracker;
 use tklog::{async_debug, async_fatal, async_info, Format, ASYNC_LOG, LEVEL};
 
 use tgbot_app::GLOBAL_CONFIG;
@@ -36,6 +37,7 @@ pub mod osint;
 pub use osint::{dns, ip};
 
 pub mod brute_force;
+pub use brute_force::sha1_cracker;
 pub use brute_force::ssh_brute;
 
 /// 配置日志 - debug:控制台输出日志 ；release：文件输出日志
@@ -49,7 +51,7 @@ async fn async_log_init() {
             .set_console(true) // 开启控制台输出
             .set_level(LEVEL::Debug) // Set log level to Debug
             .set_format(Format::LevelFlag | Format::Date | Format::Time | Format::LongFileName);
-        async_debug!("tgbot-app正在启动中，已开启debug模式日志");
+        async_debug!("tgbot-app正在启动中，已开启debug模式日志,日志输出控制台，不输出到文件");
     } else {
         // 配置全局单例
         logger
@@ -58,7 +60,7 @@ async fn async_log_init() {
             .set_format(Format::LevelFlag | Format::Date | Format::Time | Format::LongFileName) // Define structured logging output
             .set_cutmode_by_time("./logs/tgbot-app-log.log", tklog::MODE::MONTH, 3, true) // 每月，三次备份，压缩
             .await;
-        async_info!("tgbot-app正在启动中，已开启release模式日志");
+        async_info!("tgbot-app正在启动中，已开启release模式日志，日志输出到文件，不输出控制台");
     }
 }
 
@@ -181,6 +183,11 @@ Telegram Bot助手
         command: "ssh_brute".to_string(),
         description: "ssh爆破".to_string(),
     });
+    dispatcher.add_handler(CommandHandler::new("sha1", sha1_cracker));
+    botcommadns.push(BotCommand {
+        command: "sha1".to_string(),
+        description: "sha1爆破".to_string(),
+    });
 
     // ai
     dispatcher.add_handler(CommandHandler::new("chatgpt", chatgpt));
@@ -220,7 +227,7 @@ Telegram Bot助手
                                     // contain either text or a caption.
                                     // message::Text::filter().or(message::Caption::filter()),
         ),
-        1,
+        -1,
     );
     // 回调
     dispatcher.add_handler_to_group(

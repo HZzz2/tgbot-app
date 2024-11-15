@@ -8,7 +8,6 @@ use tokio::process::Command;
 pub async fn shell_no_output(bot: Bot, ctx: Context) -> Result<GroupIteration> {
     let msg = ctx.effective_message.unwrap();
     let chat_id = msg.chat.id;
-    crate::verify_telegram_id!(chat_id);
     let cm = msg.text.unwrap();
     let cm = &cm[17..].trim(); // 去掉 "/shell_no_output " 前缀
 

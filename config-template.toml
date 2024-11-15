@@ -37,7 +37,7 @@ proxy = ""
 
 
 [brute_force]
-ssh = { "username" = "root", "port" = "22", "brute_file" = "./ssh_password.txt", "threads" = "16", "display_message_time_interval_seconds" = "5" }
+ssh = { "username" = "root", "port" = "22", "brute_file" = "./wordlist.txt", "threads" = "16", "display_message_time_interval_seconds" = "5" }
 
 
 #使用此命令需下载yt-dlp程序到工作目录并添加执行权限chmod +x yt-dlp
