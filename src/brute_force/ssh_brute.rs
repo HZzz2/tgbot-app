@@ -11,6 +11,7 @@ use async_channel;
 use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
 use ferrisgram::error::Result;
 use ferrisgram::{error::GroupIteration, ext::Context, Bot};
+use tklog::async_debug;
 use tokio::{
     fs::File,
     io::{AsyncBufReadExt, BufReader},
@@ -30,7 +31,7 @@ pub async fn ssh_brute(bot: Bot, ctx: Context) -> Result<GroupIteration> {
             chat_id,
             "正在准备进行爆破，每5秒更新一次状态(减少TG_API调用速率)".to_string(),
         )
-        .parse_mode("markdown".to_string())
+        // .parse_mode("markdown".to_string())
         .send()
         .await
         .unwrap();
@@ -58,7 +59,7 @@ pub async fn ssh_brute(bot: Bot, ctx: Context) -> Result<GroupIteration> {
         .get("brute_file")
         .map(|s| s.as_str())
         .unwrap();
-
+    async_debug!(username,">",brute_file);
     // 发送密码字典文件的每一行进行处理
     let (tx, rx) = async_channel::unbounded();
     let send_password_joinhandle = tokio::spawn(async move {
