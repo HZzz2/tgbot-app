@@ -24,5 +24,7 @@ jobs:
       run: cargo test --verbose
     - name: Run cargo update
       run: cargo update
+    - name: Install cargo audit
+      run: cargo install cargo-audit
     - name: Audit
       run: cargo audit
