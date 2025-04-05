@@ -1,5 +1,5 @@
 use std::{
-    collections::{HashMap, HashSet},
+    collections::HashMap,
     sync::Arc,
 };
 
@@ -40,7 +40,8 @@ pub struct Config {
 #[derive(Deserialize, Debug, Clone)]
 pub struct Telegram {
     pub bot_token: String,
-    pub ids: HashSet<i64>,
+    // pub ids: HashSet<i64>,
+    pub ids: Vec<i64>,
 }
 
 #[derive(Deserialize, Debug, Clone)]

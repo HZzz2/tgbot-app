@@ -1,6 +1,8 @@
 //! 多功能Telegram机器人，提供了丰富的实用命令和功能。程序设计为以Linux服务的方式运行，并在出错时自动重启，确保稳定可靠的服务。
 //! 推荐在Linux中以服务的方式进行部署 [GitHub](https://github.com/HZzz2/tgbot-app)
 
+use std::sync::Arc;
+
 use anyhow::Result;
 use ferrisgram::ext::filters::callback_query::All;
 use ferrisgram::ext::filters::message;
@@ -8,6 +10,7 @@ use ferrisgram::ext::handlers::{CallbackQueryHandler, CommandHandler, MessageHan
 use ferrisgram::ext::{Dispatcher, Updater};
 use ferrisgram::types::BotCommand;
 use ferrisgram::Bot;
+use tokio_cron_scheduler::{JobBuilder, JobScheduler};
 // use tgbot_app::brute_force::sha1_cracker;
 use tklog::{async_debug, async_fatal, async_info, Format, ASYNC_LOG, LEVEL};
 
@@ -39,6 +42,8 @@ pub use osint::{dns, ip};
 pub mod brute_force;
 pub use brute_force::sha1_cracker;
 pub use brute_force::ssh_brute;
+
+pub mod cron;
 
 /// 配置日志 - debug:控制台输出日志 ；release：文件输出日志
 async fn async_log_init() {
@@ -74,7 +79,7 @@ async fn main() -> Result<(), anyhow::Error> {
 
     let bot_token = &config.telegram.bot_token;
     // 此函数创建一个新的机器人实例并相应地处理错误
-    let bot = match Bot::new(bot_token, None).await {
+    let bot: Bot = match Bot::new(bot_token, None).await {
         Ok(bot) => {
             async_info!("tgbot-app启动成功");
             bot
@@ -237,6 +242,96 @@ Telegram Bot助手
 
     let mut updater = Updater::new(&bot, dispatcher);
 
+    // cron国定任务执行
+
+    // 创建调度器
+    let scheduler = JobScheduler::new().await.unwrap();
+
+    // 添加一个每2秒执行一次的任务
+    // let job = JobBuilder::new().with_timezone(chrono_tz::Asia::Shanghai)
+    // .with_cron_job_type()
+    //     .with_schedule("*/2 * * * * *")
+    //     .unwrap()
+    //     .with_run_async(Box::new(|_uuid, mut _l| {
+    //         Box::pin(async move {
+    //             async_info!("JHB run async every 2 seconds id");
+    //             // async_info!("JHB run async every 2 seconds id {:?}", uuid);
+    //             // let next_tick = l.next_tick_for_job(uuid).await;
+    //             // match next_tick {
+    //             //     Ok(Some(ts)) => async_info!("Next time for JHB 2s is {:?}", ts),
+    //             //     _ => async_fatal!("Could not get next tick for 2s job"),
+    //             // }
+    //         })
+    //     }))
+    //     .build()
+    //     .unwrap();
+
+    // 添加一个天气预报，每日8点执行推送
+
+    //     let job1 = JobBuilder::new()
+    //         .with_timezone(chrono_tz::Asia::Shanghai) // 设置任务执行的时区为上海时区（UTC+8）如果没有指定时区，默认使用UTC
+    //         .with_cron_job_type() // 指定这是一个基于cron表达式的任务（而不是基于间隔的任务）
+    //         .with_schedule("0 8 * * * *") //设置cron表达式，定义任务的执行计划 每天上午8点整（0秒）执行
+    //         .unwrap() //如果cron表达式格式正确，继续构建流程
+    //         .with_run_async(Box::new({
+    //             // 定义要异步执行的逻辑  Box::new(...)创建了一个堆分配的闭包
+    //             let cbot = Arc::new(bot.clone());
+    //             let config = Arc::new(config.clone());
+    //             move |_uuid, _l| {
+    //                 let cbot = Arc::clone(&cbot);
+    //                 let config = Arc::clone(&config);
+    //                 Box::pin(async move {
+    //                     let tianqi:Value = REQWEST_CLIENT.get("https://cn.apihz.cn/api/tianqi/tqyb.php?id=88888888&key=88888888&sheng=湖南&place=长沙")
+    //                     .send().await.unwrap().json().await.unwrap();
+    //                     let str_format = format!("
+    // *☀️ 天气预报 ☀️*
+
+    // 🏙️ *地区*: {}
+    // 🌡️ *温度*: {}°C
+    // 💧 *湿度*: {}%
+    // 🌬️ *风速*: {}m/s
+    // 🍃 *风力等级*: {}
+    // ",
+    //     tianqi["place"],
+    //     tianqi["temperature"],
+    //     tianqi["humidity"],
+    //     tianqi["windSpeed"],
+    //     tianqi["windScale"]
+    // );
+    //                     let _ = cbot
+    //                         .send_message(config.telegram.ids[0], str_format)
+    //                         .parse_mode(String::from("markdown"))
+    //                         .send()
+    //                         .await;
+    //                 }) // Box::pin(async move {...}) 创建了一个固定在堆上的异步Future
+    //             }
+    //         }))
+    //         .build()
+    //         .unwrap();
+
+    let job = JobBuilder::new()
+        .with_timezone(chrono_tz::Asia::Shanghai) // 设置任务执行的时区为上海时区（UTC+8）如果没有指定时区，默认使用UTC
+        .with_cron_job_type()
+        .with_schedule("0 0 * * * *") //设置cron表达式，定义任务的执行计划 每小时的第 0 分 0 秒执行一次任务
+        .unwrap()
+        .with_run_async(Box::new({
+            let cbot = Arc::new(bot.clone());
+            move |_uuid, _l| {
+                let cbot = Arc::clone(&cbot);
+                Box::pin(async move {
+                    cron::tianqi(cbot).await;
+                })
+            }
+        }))
+        .build()
+        .unwrap();
+
+    // 将任务添加到调度器
+    scheduler.add(job).await.unwrap();
+    // 启动调度器 - 这一步非常重要！
+    async_info!("启动调度器");
+    scheduler.start().await.unwrap();
+
     // This method will start long polling through the getUpdates method
     // let _ = updater.start_polling(true).await;
     match updater.start_polling(true).await {
@@ -249,3 +344,5 @@ Telegram Bot助手
     }
     Ok(())
 }
+
+
