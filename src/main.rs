@@ -245,7 +245,7 @@ Telegram Bot助手
     // cron国定任务执行
 
     // 创建调度器
-    let scheduler = JobScheduler::new().await.unwrap();
+    // let scheduler = JobScheduler::new().await.unwrap();
 
     // 添加一个每2秒执行一次的任务
     // let job = JobBuilder::new().with_timezone(chrono_tz::Asia::Shanghai)
@@ -309,29 +309,34 @@ Telegram Bot助手
     //         .build()
     //         .unwrap();
 
-    let job = JobBuilder::new()
-        .with_timezone(chrono_tz::Asia::Shanghai) // 设置任务执行的时区为上海时区（UTC+8）如果没有指定时区，默认使用UTC
-        .with_cron_job_type()
-        .with_schedule("0 0 * * * *") //设置cron表达式，定义任务的执行计划 每小时的第 0 分 0 秒执行一次任务
-        .unwrap()
-        .with_run_async(Box::new({
-            let cbot = Arc::new(bot.clone());
-            move |_uuid, _l| {
-                let cbot = Arc::clone(&cbot);
-                Box::pin(async move {
-                    cron::tianqi(cbot).await;
-                })
-            }
-        }))
-        .build()
-        .unwrap();
+
+    // 正常每小时运行
+    // let job = JobBuilder::new()
+    //     .with_timezone(chrono_tz::Asia::Shanghai) // 设置任务执行的时区为上海时区（UTC+8）如果没有指定时区，默认使用UTC
+    //     .with_cron_job_type()
+    //     .with_schedule("0 0 * * * *") //设置cron表达式，定义任务的执行计划 每小时的第 0 分 0 秒执行一次任务
+    //     .unwrap()
+    //     .with_run_async(Box::new({
+    //         let cbot = Arc::new(bot.clone());
+    //         move |_uuid, _l| {
+    //             let cbot = Arc::clone(&cbot);
+    //             Box::pin(async move {
+    //                 cron::tianqi(cbot).await;
+    //             })
+    //         }
+    //     }))
+    //     .build()
+    //     .unwrap();
 
     // 将任务添加到调度器
-    scheduler.add(job).await.unwrap();
+    // scheduler.add(job).await.unwrap();
     // 启动调度器 - 这一步非常重要！
-    async_info!("启动调度器");
-    scheduler.start().await.unwrap();
+    // async_info!("启动调度器");
+    // scheduler.start().await.unwrap();
 
+
+
+    
     // This method will start long polling through the getUpdates method
     // let _ = updater.start_polling(true).await;
     match updater.start_polling(true).await {

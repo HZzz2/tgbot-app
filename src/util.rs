@@ -111,8 +111,7 @@ pub async fn ai_q_s<T: Into<String>>(content: T) -> anyhow::Result<String> {
         .header("Content-Type", "application/json")
         .json(&request_body)
         .send()
-        .await
-        .unwrap();
+        .await?;
     let response_body = res.json::<serde_json::Value>().await.unwrap();
     let rep = response_body["choices"][0]["message"]["content"]
         .as_str()
