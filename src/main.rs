@@ -1,7 +1,6 @@
 //! 多功能Telegram机器人，提供了丰富的实用命令和功能。程序设计为以Linux服务的方式运行，并在出错时自动重启，确保稳定可靠的服务。
 //! 推荐在Linux中以服务的方式进行部署 [GitHub](https://github.com/HZzz2/tgbot-app)
 
-use std::sync::Arc;
 
 use anyhow::Result;
 use ferrisgram::ext::filters::callback_query::All;
